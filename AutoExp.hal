@@ -54,6 +54,30 @@ BEGIN
   RETURN;
 END;
 
+procedure PLItemPriceSerchCSV(array string plcodes,string plstring,var integer arcnt,string item,var string scv)
+BEGIN
+  integer i;
+  record PLVc PLr;
+  
+  for (i=0;i<arcnt+1;i=i+1) begin
+   PLr.ArtCode = item;
+   PLr.PLCode = plcodes[i];
+   if nonblank(plcodes[i]) then begin
+     if ReadFirstKey("ArtCode",PLr,2,true) then begin
+     	if(PLr.ExVatPrice!=0)then begin
+      	scv = scv & valtostring(PLr.ExVatPrice,m45Val,"",".",0) & ";";
+      end else begin
+      	scv = scv & ("0;");
+      end;
+     end else begin
+      scv = scv & ("0;");
+     end;
+   end;
+  end;
+  
+  RETURN;
+END;
+
 procedure ISItemQtySerch(string item,string location,var val qty)
 begin
   record ItemStatusVc ISr;
