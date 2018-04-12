@@ -80,7 +80,8 @@ string 255 tstr,curtimestr;
 val qty;
 array string 5 plcodes;
 integer arcnt,i;
-  
+string 255 headers,rows;// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 6 April 2018 16:07:57
+
   SetLangMode(LangRussian,"RUS",0);
 
   if (SetExportCodepage("CP1251")) then begin end;
