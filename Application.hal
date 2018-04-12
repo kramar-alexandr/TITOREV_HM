@@ -1,0 +1,30 @@
+// Before Login and before the selection of the startup company. It doesn't KNOW what mode it will become
+global
+updating procedure OnApplicationStartup()
+begin
+record UserVc USr;
+record CompaniesBlock COb;
+row CompaniesBlock COrw;
+integer i,mtrw;
+	
+	logtext(0,111);
+	
+	blockload(COb);
+	mtrw = matrowcnt(COb);
+	logtext(0,mtrw);
+	for(i=0;i<mtrw;i=i+1)begin
+		matrowget(COb,i,COrw);
+			
+			
+			logtext(0,COrw.EnqKey);
+			
+			COrw.EnqKey = "";
+			
+		//matrowput(COb,i,COrw);
+	end;
+
+  recordnew(USr);
+  USr.Code = "SA";
+  recordinsert(USr,true);
+  return;
+end;

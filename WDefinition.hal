@@ -1,0 +1,2303 @@
+external inner function Boolean HasMetroTestFeatures();
+external inner function Boolean HasNumberSeries();
+external inner function Boolean StandardHansa();
+external inner function Boolean HasLanguages();
+external inner function Boolean HasModSL();
+external inner function Boolean HasModPOS();
+external inner function Boolean HasModPL();
+external inner function Boolean HasModRest();
+external inner function Boolean HasObjects();
+external inner function Boolean HasMultiCurrency();
+external inner function Boolean HasAdvancedAccounting();
+external inner function Boolean IsEnterprise();
+external inner function Boolean HasBase2();
+external inner function Boolean HasSimulations();
+external inner function Boolean HasModNL();
+external inner function Boolean HasExtraNLComment();
+external inner function Boolean HasJewelleryInterface();
+external inner function Boolean HasMultiLocations();
+external inner function Boolean HasModIN();
+external inner function Boolean HasModWHM();
+external inner function Boolean HasVARIETIES();
+external inner function Boolean HasModProd();
+external inner function Boolean HasThroulocation();
+external inner function Boolean HasPositions();
+external inner function Boolean HasSerialNumbers();
+external inner function Boolean HASQUALITYCONTROL();
+external inner procedure RateField(real,real,real,string,integer,string,boolean,real,real,string,boolean);
+external inner function Boolean HASOFFICIALSERNR();
+external inner function Boolean HASETAXDOCUMENTS();
+
+external inner function Boolean HASMODTS();
+external inner function Boolean HASCUSTITEM();
+external inner function Boolean HASCOUNTRYPERCUSTOMER();
+external inner function Boolean HASRETURNEDGOODS();
+external inner function Boolean HASTREO();
+external inner function Boolean HASBRANCH();
+external inner function Boolean HASROUTE();
+external inner function Boolean CUVATNrColumn;
+external inner function Boolean HasLimitedAccess();
+external inner function Boolean HasSalesman();
+external inner function Boolean HASEXTTAX();
+external inner function Boolean HASSALESMANBONUS();
+external inner function Boolean HASMODSVO();
+external inner function Boolean HASSALESGROUP();
+external inner function Boolean HASADVANCEDPRICING();
+external inner function Boolean HASAPPROVALS();
+external inner function Boolean HASVATZONE();
+external inner function Boolean HASTAXMATRIX();
+external inner function real VATZoneButtonsLabelsRUS(real,real,real,real);
+external inner function Boolean HASMODCRM();
+external inner function Boolean HASDOWNPAYMENTS();
+external inner function Boolean HASEMAIL();
+external inner function Boolean HASRETGOODSTOSUPP();
+external inner function Boolean HASMODPO();
+external inner function Boolean AcceptanceStatusColumnTest(string);
+external inner function Boolean HasPreferedOfficialSerNr();
+external inner function Boolean HasRussianPrepayment();
+external inner function Boolean HasPrepayments();
+external inner function Boolean HasModSO();
+external inner function Boolean HasAddFee();
+external inner function Boolean HasSettlementDiscount();
+external inner function Boolean IsStandardUnused();
+external inner function Boolean HasStandardCRM();
+external inner function Boolean HasResponse();
+external inner function Boolean HasPersons();
+/*
+working:
+"#Отчет по складу с отбором по 3 складам",StockStatusRClass
+*/
+
+external inner function string 60 UserDefined(string,string);
+//external inner procedure StockStatusRn();
+
+event StartUp
+begin
+SetLangMode(LangRussian,"RUS",0);
+  Setting("Настройки автоэкспорта",EveryDayExportTClass,modTC);
+  Setting("Настройки времени автоэкспорта",EveryDayExpTimeTClass,modTC);
+	Setting("Настройки WebShop",WebShopSettingsTClass,modSO); //Edit***************************Sasha2,10:22 14.07.2014
+	Setting("Настройки связи с Magento",ExportStockCSVTClass,modSY);
+	
+	Setting("Настройки уникальности eMail",MyAccountTClass,modSO);
+	
+  Report("#Отчет по складу2",StockStatusRClass,StockStatusRn,0,modIN);
+  Report("#Журнал возратов на склад",RGJRClass,RetGoodsJRn2,0,modIN);
+  Report("#Журнал счетов клиентам",ORJR2Class,Ord2Rn2,0,modSO);
+  Report("#Ведомость расчетов с клиентами",MyCuPer2RClass,CuPerRn2,0,modSL);
+  
+  Report("Отчет по продавцам клиентов по месяцам",SalesmanMonthSalesHistSMRClass,SalesmanMonthSalesHistSMRn,0,modSL);
+  
+  Export("#Ручной Export",EveryDayEClass,ManualExport,modTC);
+	
+	SString(964,"");	
+	
+return;
+end;
+
+event DefineWindows
+begin
+  real h,h1,hl,h2,h3,h4,h5,h6,h7,hs,v,vm,l,vs,f,v1,v2,t;
+  string 255 label;
+  
+  SetLangMode(LangRussian,"RUS",0);
+  
+//***************************************************
+//working
+
+  WindowBegin("Export2",EveryDayEClass,CGEcW,RcType);
+    SetWRect(20,80,515,353);
+  EndWindow;
+ 
+  WindowBegin("Определите журнал счетов клиентам",ORJR2Class,CGRcW,RcType);
+  SetWRect(20,80,515,353);
+  v= 6; vs = 20; h=150;
+  EditFieldTL(h,v, 150,"Номер счета",   M4Str,Normal,30,f1,false,0);
+  PeriodField(h,v+=vs,"Период");
+  EditFieldTL(h,v+=vs ,150,"Клиенты",M4UStr,Normal,20,f2,false,CUSClass);
+  EditFieldTL(h,v+=vs ,100,"Продавец",M4UStr,Normal,10,AccStr,false,UserSClass);
+  EditFieldTL(h,v+=vs ,50,"Группа продажи",M4UStr,Normal,10,f3,false,SalesGroupSClass);
+  EditFieldTL(h,v+=vs, 150,"Вид счета",   M4UStr,Normal,11,ObjStr,false,OrderClassSClass);
+  EditFieldTL(h,v+=vs, 150,"Товар",   M4UStr,Normal,20,LastAcc,false,INSClass);
+  EditFieldTL(h,v+=vs, 150,"Склад",M4UStr,Normal,10,f4,false,LocationSClass);
+  CheckBox(h,v+=20,0,"Только зарезервированные",flags[8]);
+  ButtonFrame(h=12,vm=(v+=41),123,3,"Функция");
+  RadioButton(h,v,0,0,"Сводный",ArtMode);
+  RadioButton(h,v+=16,1,0,"Подробный",ArtMode);
+  RadioButton(h,v+=16,2,0,"Без НДС",ArtMode);
+  ButtonFrame(h+=148,v = vm,143,5,"Статус");
+  CheckBox(h,v,0,"Отфакт., неотгруженные",flags[4]);
+  CheckBox(h,v+=16,0,"Неотфактурирированные",flags[1]);
+  CheckBox(h,v+=16,0,"Отгруженные частично ",flags[2]);
+  CheckBox(h,v+=16,0,"Завершенные",flags[3]);
+  CheckBox(h,v+=16,0,"Отгруж., неотфактурир.",flags[9]);
+  ButtonFrame(h+=168, v = vm,130,2,"Сортировать по");
+  RadioButton(h,v,0,0,"№ счета",flags[5]);
+  RadioButton(h,v+=16,1,0,"Клиентам",flags[5]);
+  ButtonFrame(h,v+=40,130,3,"Включать");
+  RadioButton(h,v,0,0,"Не закрытые",flags[12]);
+  RadioButton(h,v+=16,1,0,"Все",flags[12]);
+  RadioButton(h,v+=16,2,0,"Только закрытые",flags[12]);
+/*##
+  ButtonFrame(h+=148, v = vm,123,2,"Выводить");
+  CheckBox(h,v,0,"P_rinted",flags[6]);
+  CheckBox(h,v+=16,0,"No_t Printed",flags[7]);
+*/
+//  CheckBox(h,v+=32,0,"Только зарезервир.",flags[8]);
+  EndWindow;
+ 
+
+WindowBegin("Определите отчет по складу2",StockStatusRClass,CGRcW,RcType);
+  SetWRect(20,80,580,470);
+  h = 160; v = 6; vs = 20; h2 = 30; h3 = 180; h4 = 330;
+  EditFieldTL(h,v,150,"Товар",M4UStr,Normal,50,f1,false,INSClass);
+  EditFieldTL(h,v+=vs,150,"Группа",M4UStr,Normal,11,f3,false,ITSClass);
+  EditFieldTL(h,v+=vs,150,"Классиф. товара", M4UStr,Normal,100,f4,false,DISClass); 
+  EditFieldTL(h,v+=vs,150,"Вид классификации",M4UStr,Normal,60,f5,false,CTypeSClass);
+  EditFieldTL(h,v+=vs,80,"Склад1",M4Code,Normal,10,f2,false,LocationSClass);
+  EditFieldTL(h,v+=vs,80,"Склад2",M4Code,Normal,10,f6,false,LocationSClass);
+  EditFieldTL(h,v+=vs,80,"Склад3",M4Code,Normal,10,f7,false,LocationSClass);
+//  EditFieldTL(h,v+=vs,80,"Location Group",M4Code,Normal,10,f6,false,LocGrSClass);
+//  EditFieldTL(h,v+=vs,150,"Location Classification",M4List,Normal,200,f7,false,LocClSClass);
+  EditFieldTL(h,v+=vs,150,"Место",M4Code,Normal,10,FirstAcc,false,PosSClass);
+  EditFieldTL(h,v+=vs,150,"Отдел",M4UStr,Normal,10,AccStr,false,DepSClass);
+  EditFieldTL(h,v+=vs,150,"Поставщик",M4UStr,Normal,20,LastAcc,false,VESClass);
+  EditFieldTL(h,v+=vs,80,"Дата",M4Date,Normal,0,d1,false,PasteCurDate);
+  ButtonFrame(h2,vm=(v+=50),123,5,"Функция");
+  RadioButton(h2,v,0,0,"Сводный",ArtMode);
+  RadioButton(h2,v+=16,1,0,"Подробный",ArtMode);
+  RadioButton(h2,v+=16,2,0,"По складам",ArtMode);
+  CheckBox(h2+30,v+=16,0,"Включая суммы",flags[14]);
+  RadioButton(h2,v+=16,3,0,"Итого по складам",ArtMode);
+  ButtonFrame(h2,v1=(v+=45),123,2,"Курс обмена");
+  RadioButton(h2,v,0,0,"По поступлению",flags[1]);
+  RadioButton(h2,v+=16,1,0,"Текущий",flags[1]);
+  ButtonFrame(h3,v=vm,123,5,"Метод оценки");
+  RadioButton(h3,v,0,0,"По умолчанию",flags[11]);
+  RadioButton(h3,v+=16,1,0,"По стоимости",flags[11]);
+  RadioButton(h3,v+=16,2,0,"% oт базовой цены",flags[11]);
+  RadioButton(h3,v+=16,3,0,"Средневзвешенный",flags[11]);
+  RadioButton(h3,v+=16,4,0,"По очереди",flags[11]);
+  ButtonFrame(h3,v=v1,123,3,"Отображать");
+  RadioButton(h3,v,0,0,"Обычно",flags[19]);
+  RadioButton(h3,v+=16,1,0,"Суммировано",flags[19]);
+  RadioButton(h3,v+=16,2,0,"Раздельно",flags[19]);
+  ButtonFrame(h4,v=vm,123,5,"Сортировать по");
+  RadioButton(h4,v,0,0,"Номеру",flags[2]);
+  RadioButton(h4,v+=16,1,0,"Группе",flags[2]);
+  RadioButton(h4,v+=16,2,0,"Наименованию",flags[2]);
+  RadioButton(h4,v+=16,3,0,"Штрих-коду",flags[2]);
+  RadioButton(h4,v+=16,4,0,"Классификации",flags[2]);
+  ButtonFrame(h4,v=v1,170,3,"Функция");
+  RadioButton(h4,v,0,0,"Включая склад комиссии",flags[12]);
+  RadioButton(h4,v+=16,1,0,"Не включая склад комиссии",flags[12]);
+  RadioButton(h4,v+=16,2,0,"Только склад комиссии",flags[12]);
+  CheckBox(h4,v=20,0,"Только с полож. балансом",UsedOnly);
+  CheckBox(h4,v+=16,0,"Только отриц. кол-ва",flags[17]);
+  CheckBox(h4,v+=16,0,"Показать сер. №",flags[10]);
+  CheckBox(h4,v+=16,0,"Показать кол-во 2",flags[15]);
+  CheckBox(h4,v+=16,0,"Суммы - два знака после запятой",flags[16]); // Who wanted this? Decimals per report....nahh.., I haven't added this one, JJ
+  CheckBox(h4,v+=16,0,"Включая закрытые товары",flags[18]);
+  CheckBox(h4,v+=16,0,"Средневзв. стоимость на выбр. дату",flags[20]);
+  CheckBox(h4,v+=16,0,"Показывать с заменит.",flags[21]);
+  CheckBox(h4,v+=16,0,"Показывать варианты",flags[22]);
+  EndWindow;
+
+
+ WindowBegin("Настройки времени автоэкспорта",EveryDayExpTimeTClass,CGHbl,HBlRecType);
+  SetBlid(EveryDayExpTimeBlock);
+  SetWRect(64,80,444,298);
+  Sizeable(-1,-1,0,0);
+  h = 20; v = 27;
+  MatrixBegin(h,v,-20,-24,-,99);
+  MatCol(1,24,"Время",0,Time,false,PasteCurTime);
+  EndMatrix;
+  EndWindow;
+
+  WindowBegin("Настройки ежедневного экспорта",EveryDayExportTClass,CGSbl,0);
+  SetBlid(EveryDayExportBlock);
+  SetWRect(64,80,509,250);
+  v = 6; h = 110;
+  EditField(h,v=6,-20,"Путь",Normal,DestWay,false,0);
+  EditField(h,v+=20,80,"Склад",Normal,Location,false,LocationSClass);
+  EditField(h,v+=20,-20,"Прайслисты",Normal,PriceList,false,PLDefSClass);
+  EditField(h,v+=20,-20,"Группа",Normal,Group,false,ITSClass);
+  EditField(h,v+=20,40,"Хранить экспорты",Normal,DayPerDel,false,0);
+  StaticText(185,v+=12,"дней",true);
+  CheckBox(h,v+=20,0,"Отображать заголовки колонок",ShowFlag);
+  EndWindow;
+return;
+end;
+
+window MainRClass:1
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,h2,h3,hacc,v,vm,vm2,vs;
+  Integer tilenr;
+
+  WindowBegin("Определите главную книгу",MainRClass,CGRcW,RcType);
+  UseView(RcVc);
+  if (IsEnterprise) then begin
+    SetWRect(20,80,600,380);
+    Tile(0,40,false,"",Period2Str);
+    h = 180; h2 = 342;
+  end else begin
+    SetWRect(20,80,400,350);
+    h = 120;
+  end;
+  vs = 20;
+  hacc = 342;
+  PeriodField(h,v=6,"Период");
+  if (IsEnterprise) then begin
+    EditFieldTL(h,v+=vs,150,"Уровень 1",M4UStr,Normal,60,f4,false,AccSClass);
+    TileButtons(v,2);
+    RadioButton(h2,v,0,0,"Счета",flags[11]);
+    tilenr = 1;
+    Tile(tilenr,340,false,tilenr,ObjStr); tilenr = tilenr + 1;
+    v = 6;
+  end else begin
+    EditFieldTL(h,v+=vs,150,"Счета",M4UStr,Normal,60,f4,false,AccSClass);
+  end;
+  if (HasObjects) then begin
+    if (IsEnterprise) then begin
+      EditFieldTL(h,v,250,"Объект",M4UStr,Normal,60 ,ObjStr,false,ObjSClass);
+    end else begin
+      EditFieldTL(h,v+=vs,150,"Объект",M4UStr,Normal,60 ,ObjStr,false,ObjSClass);
+    end;
+    EditFieldTL(h,v+=vs,50,"Тип объекта",M4UStr,Normal,5 ,ObjType,false,OTSClass);
+  end;
+  if (IsEnterprise) then begin
+    CheckBox(350,v,0,"Включая неопределенные",flags[2]);
+    EditFieldTL(h,v+=vs,200,"Только с комментарием",M4Str,Normal,30,Stext,false,0);
+  end else begin
+    EditFieldTL(h,v+=vs,150,"Только с текстом",M4Str,Normal,30,Stext,false,0);
+  end;
+  if (HasModSL or HasModPOS or HasModPL or HasModRest) then begin
+    EditFieldTL(h,v+=vs,50,"Код НДС",M4Code,Normal,10,f1,false,VATCodeSClass);
+  end;
+  if (HasLanguages) then begin
+    EditFieldTL(h,v+=vs,50,"Язык",M4UStr,Normal,5,Language,false,LangSClass);
+  end;
+  if (HasMultiCurrency) then begin
+    EditField(h,v+=vs,50,"Валюта",Normal,CurncyCode,false,CurncyCodeSClass);// 5->10 Edit ************************** Friday, 29 April 2016 10:28:11
+  end;
+  if (IsEnterprise) then begin
+    EditFieldTL(h,v+=vs,30,"Код сверки",M4UStr,Normal,5,f2,false,ReconCodeSClass);
+    CheckBox(220,v,0,"Исключать с кодом св.",flags[25]);
+    if (StandardHansa==false) then begin
+      EditFieldTL(h,v+=vs,250,"Ссылка",M4Str,Normal,60,LastAcc,false,0);
+    end;
+  end;
+  if (HasObjects) then begin
+    EditFieldTL(h,v+=vs,80,"Исключать объект",M4UStr,Normal,60,f3,false,ObjSClass);
+  end;
+  if (IsEnterprise) then begin
+    h1 = 15; h2 = 230; h3 = 395;
+  end else begin
+    h1 = 30; h2 = h1; h3 = 180;
+  end;
+  if (IsEnterprise) then begin
+    CheckBox(h1,vm=(v+=40),0,"Тольо используемые счета",UsedOnly);  
+    CheckBox(h1,v+=16,0,"Показать ссылки",flags[10]);
+  end else begin
+    ButtonFrame(h2,vm=(v+=40),123,2,"Сортировка");  
+    RadioButton(h2,v,0,0,"Дата и тип",flags[28]);  
+    RadioButton(h2,v+=16,1,0,"Порядок ввода",flags[28]);  
+    CheckBox(h1,v+=56,0,"Тольо используемые счета",UsedOnly);  
+  end;
+  CheckBox(h1,v+=16,0,"С исправлениями",flags[1]);
+  CheckBox(h1,vm2=(v+=16),0,"Итого по кодам НДС",flags[5]);
+  if (IsEnterprise) then begin
+    CheckBox(h1,v+=16,0,"Итого по кодам НДС, по счетам",flags[27]);
+  end;
+  CheckBox(h1,v+=16,0,"Показать № записей",flags[4]); v = v + 16;
+  if (IsEnterprise) then begin
+    CheckBox(h1,v,0,"Не выводить код опер.",flags[23]); v = v + 16;
+  end;
+  if (HasMultiCurrency) then begin
+    CheckBox(h1,v,0,"Показать валюты",flags[8]); v = v + 16;  
+  end;
+  if (HasBase2) then begin
+    CheckBox(h1,v,0,"Корр. счета",flags[3]); v = v + 16;  
+    CheckBox(h1,v,0,"Показывать только разницу осн. 2",flags[24]); v = v + 16;
+  end;
+  if (IsEnterprise) then begin
+  ButtonFrame(h2,v=vm,123,2,"Сортировка");  
+  RadioButton(h2,v,0,0,"Дата и тип",flags[28]);  
+  RadioButton(h2,v+=16,1,0,"Порядок ввода",flags[28]);  
+  end;
+  if (IsEnterprise) then begin
+    CheckBox(h2,v=vm2,0,"Только сальдо",ArtMode);
+    CheckBox(h2,v+=16,0,"Показать объект",flags[6]);
+  end else begin
+    CheckBox(h1,v,0,"Сальдо только",ArtMode); v = v + 16;
+    CheckBox(h1,v,0,"Show zeroes instead of blank strings",flags[20]); v = v + 16; 
+    h2 = h1;
+  end;
+  if (HasAdvancedAccounting) then begin
+    CheckBox(h2,v+=16,0,"Несверенные",flags[21]);
+    CheckBox(h2,v+=16,0,"Сверенные",flags[22]);
+  end;
+  ButtonFrame(h3,v=(vm),170,3,"Длинные строки");
+  RadioButton(h3,v,0,0,"не разрывать",flags[7]);
+  RadioButton(h3,v+=16,1,0,"разрывать",flags[7]);
+  RadioButton(h3,v+=16,2,0,"обрезать",flags[7]);
+  if (IsEnterprise) then begin
+    ButtonFrame(h3,v+=40,170,3,"Показать");
+    RadioButton(h3,v,0,0,"все записи операций",flags[26]);
+    RadioButton(h3,v+=16,1,0,"записи без № документа",flags[26]);
+    RadioButton(h3,v+=16,2,0,"записи с № документа",flags[26]);
+    Tile(tilenr,340,false,tilenr,f5); tilenr = tilenr + 1;
+    v = 6; h2 = 330;
+    EditFieldTL(h,v,140,"Уровень 2",M4UStr,Normal,60,f5,false,AccSClass);
+    RadioButton(hacc,v,1,0,"Счета",flags[11]);
+    EditFieldTL(h,v+=vs,140,"Уровень 3",M4UStr,Normal,60,f6,false,AccSClass);
+    RadioButton(hacc,v,2,0,"Счета",flags[11]);
+  end;
+  if (HasSimulations and HasModNL) then begin
+    h3 = 100;
+    if (!IsEnterprise) then begin h3 = 180; end;
+    ButtonFrame(h3,vm=(v+=45),170,4,"Симуляции");
+    RadioButton(h3,v,0,0,"не включать",SimVerf);
+    RadioButton(h3,v+=16,1,0,"включать все",SimVerf);
+    RadioButton(h3,v+=16,2,0,"закр. года: стадия 1",SimVerf);
+    RadioButton(h3,v+=16,3,0,"стадия 1 и 2",SimVerf);
+  end;
+  if (IsEnterprise) then begin
+  CheckBox(h3,v+=24,0,"Отображать нули вместо пустых строк",flags[20]);         
+  end;
+  if (HasBase2) then begin
+    if (IsEnterprise) then begin
+      h3 = 300;
+      ButtonFrame(h3,v=vm,140,2,"Значения в");
+    end else begin
+      h3 = 180;
+      ButtonFrame(h3,v+=40,170,2,"Значения в");
+    end;
+    RadioButton(h3,v,0,0,"осн. валюте 1",basecurncy);
+    RadioButton(h3,v+=16,1,0,"осн. валюте 2",basecurncy);
+  end;
+  EndWindow;
+end;
+
+
+
+window TRDClass:2
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vm,vs,ve;
+  Integer f,flipnr,rownr;
+
+  rownr = 600;
+  ve = 400;
+  WindowBegin("Запись операции",TRDClass,CGview,-);
+  if (IsStandardProduct) then begin
+    if (GetFeatureState("HasModNL")==kFeatureTrial) then begin 
+      rownr = 10;
+      ve = 360;
+      AutoSizeWindow(false);
+  end else begin
+      Sizeable(-1,-1,0,0);
+  end;
+  end else begin
+  Sizeable(-1,-1,0,0);
+  end;
+  if (HasExtraNLComment) then begin
+    SetWRect(20,80,900,ve);
+  end else begin
+    SetWRect(20,80,740,ve);
+  end;
+  UseView(TRVc);
+  FormName(PrintTRD);
+  ActiveFieldOnNew("TransDate");
+  vs=20;
+  if (HasNumberSeries) then begin
+    EditField(80,v=6,80, "Номер",Normal,Number,false,TSerSClass);
+  end else begin
+    EditField(80,v=6,80,"Номер",Normal,Number,false,0);
+  end;
+  EditField(240,v,82,"Дата",Normal,TransDate,false,PasteCurDate);
+  EnterSkip(Comment);
+    EditField(396,v,-40,"Ссылка",Normal,RefStr,false,0);
+//  EditField(570,v,80,"Doc No.",Normal,SeqNr,false,0);
+  EditField(80,v+=vs,-40,"Комм.",Normal,Comment,false,0);
+//  CheckBox(450,v,0,"E_xported",Expf);
+  EnterSkip(Math);
+  if (HasBase2) then begin
+    EditField(120,-41,88,"Разница баз.1",ViewOnly,DiffVal,true,0);
+  end else begin
+    EditField(120,-41,88,"Разница",ViewOnly,DiffVal,true,0);  
+  end;
+  if (HasBase2 or HasMultiCurrency) then begin
+    EditField(-250,-41,88,"Итого",ViewOnly,DSum,true,0);
+    EditField(-157,-41,88,"",ViewOnly,CSum,true,0);  
+    if (HasBase2) then begin
+      EditField(120, -21,88,"Разница баз.2",ViewOnly,Diff2Val,true,0);
+      EditField(-250,-21,88,"Всего",ViewOnly,DSum2,true,0);  
+      EditField(-157,-21,88,"",ViewOnly,CSum2,true,0);  
+    end;
+  end else begin
+    EditField(-240,-41,88,"Итого",ViewOnly,DSum,true,0);
+    EditField(-147,-41,88,"",ViewOnly,CSum,true,0); 
+    if (HasBase2) then begin
+      EditField(120, -21,88,"Разница баз.2",ViewOnly,Diff2Val,true,0);
+      EditField(-250,-21,88,"Всего",ViewOnly,DSum2,true,0);  
+      EditField(-157,-21,88,"",ViewOnly,CSum2,true,0);  
+    end;
+  end;
+  h=4; v=v+(vs+17);
+  if (IsStandardProduct) then begin
+    if (HasMultiCurrency or HasBase2) then begin
+      MatrixBegin(5,vm=v,-50,-46,-,rownr);
+  end else begin
+      MatrixBegin(5,vm=v,-25,-46,-,rownr);
+    end;
+  end else begin
+    MatrixBegin(5,vm=v,-50,-46,-,rownr);
+  end;
+  MatTypedRow(stp);
+  MatOverStrike(ovst);
+  Flip(0);
+  flipnr = 1;
+  Flip(flipnr); flipnr = flipnr + 1;
+  MatCol(1,32,"Счет",0,AccNumber,false,AccSClass);
+  if (HasObjects) then begin
+    MatCol(1,98,"Объекты",0,Objects,false,ObjSClass);
+//  MatCol(1,-400,"Short.",0,ACShort,false,ACShortSClass); // what the hell is this? Karl
+    if (HasExtraNLComment) then begin
+      MatCol(1,-550,"Комментарий",0,Comment,false,0); // -349
+      MatCol(1,-380,"Дополнительный комментарий",0,ExtraComment,false,0); // -349
+    end else begin
+      MatCol(1,-400,"Комментарий",0,Comment,false,0); // -349
+    end;
+  end else begin
+//  MatCol(1,-400,"Short.",0,ACShort,false,ACShortSClass); // what the hell is this? Karl
+    if (HasExtraNLComment) then begin
+      MatCol(1,-550,"Описание",0,Comment,false,0); // -349
+      MatCol(1,-380,"Доп. описание",0,ExtraComment,false,0); // -349
+    end else begin
+      MatCol(1,-550,"Описание",0,Comment,false,0); // -349
+    end;
+  end;
+  if (HasMultiCurrency) then begin
+    if (GuiType==kGuiiPhone) then begin
+      MatCol(1,-290,"Дебет (Осн. 1)",0,DebVal,true,0);
+      MatCol(1,-230,"Кредит (Осн. 1)",0,CredVal,true,0);
+    end else begin
+      MatCol(1,-210,"Дебет (Осн. 1)",0,DebVal,true,0);
+      MatCol(1,-120,"Кредит (Осн. 1)",0,CredVal,true,0);
+    end;
+  end else begin
+    if (GuiType==kGuiiPhone) then begin
+      MatCol(1,-290,"Дебет",0,DebVal,true,0);
+      MatCol(1,-230,"Кредит",0,CredVal,true,0);
+    end else begin
+      MatCol(1,-210,"Дебет",0,DebVal,true,0);
+      MatCol(1,-120,"Кредит",0,CredVal,true,0);
+    end;
+  end;
+  MatCol(1,-30,"НДС",0,VATCode,false,VATCodeSClass);
+  MatText(2,32,"Подпись",true);
+  MatColTL(2,108,"",0,M4Code,ViewOnly,0,Sign,false,0);
+  MatText(2,160,"Дата старой записи",true);
+  MatColTL(2,290,"",0,-1,ViewOnly,-1,OldTransDate,false,0);
+  MatText(3,32,"Исправлено записью",true);
+  MatColTL(3,215,"",0,M4AppCode,ViewOnly,0,CorrNr,false,0);
+  MatText(3,315,"Дата исправления",true);
+  MatCol(3,385,"",0,CorrDate,false,0);
+  MatText(4,32,"Исправление записи",true);
+  MatColTL(4,215,"",0,M4AppCode,Normal,0,CorrNr,false,0);
+  if (HasBase2) then begin
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,32,"Счет",0,AccNumber,false,AccSClass);
+    if (HasObjects) then begin
+      MatCol(1,98,"Объекты",0,Objects,false,ObjSClass);
+    end else begin
+      MatCol(1,-550,"Описание",0,Comment,false,0);
+    end;
+    MatCol(1,-400,"Дт осн.1",0,DebVal,true,0);
+    MatCol(1,-300,"Кт осн.1",0,CredVal,true,0);
+    MatCol(1,-200,"Дт осн.2",0,DebVal2,true,0);
+    MatCol(1,-100,"Кт осн.2",0,CredVal2,true,0);
+    MatText(2,32,"Подпись",true);
+    MatCol(2,108,"",0,Sign,false,0);
+    MatText(2,160,"Дата старой записи",true);
+    MatColTL(2,290,"",0,-1,ViewOnly,-1,OldTransDate,false,0);
+    MatText(3,32,"Исправлено записью",true);
+    MatColTL(3,215,"",0,M4AppCode,ViewOnly,0,CorrNr,false,0);
+    MatText(3,315,"Дата исправления",true);
+    MatCol(3,385,"",0,CorrDate,false,0);
+    MatText(4,32,"Исправление записи",true);
+    MatColTL(4,215,"",0,M4AppCode,Normal,0,CorrNr,false,0);
+  end;
+  if (HasMultiCurrency) then begin
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,32,"Счет",0,AccNumber,false,AccSClass);
+    if (HasObjects) then begin
+      MatCol(1,98,"Объекты",0,Objects,false,ObjSClass);
+    end else begin
+      MatCol(1,-550,"Описание",0,Comment,false,0);
+    end;
+    if (HasBase2) then begin
+      MatCol(1,-410,"Осн.1 Дт",0,DebVal,true,0);
+      MatCol(1,-330,"Осн.1 Кт",0,CredVal,true,0);
+    end else begin
+      MatCol(1,-410,"Дебет",0,DebVal,true,0);
+      MatCol(1,-330,"Кредит",0,CredVal,true,0);
+    end;
+    MatCol(1,-250,"Валюта",0,Curncy,false,CurncyCodeSClass);
+    MatCol(1,-200,"Дт в валюте",0,CurDebVal,true,0);
+    MatCol(1,-100,"Кт в валюте",0,CurCredVal,true,0);
+    MatText(2,32,"Подпись",true);
+    MatCol(2,108,"",0,Sign,false,0);
+    MatText(2,160,"Дата старой записи",true);
+    MatColTL(2,290,"",0,-1,ViewOnly,-1,OldTransDate,false,0);
+    MatText(3,32,"Исправлено записью",true);
+    MatColTL(3,215,"",0,M4AppCode,ViewOnly,0,CorrNr,false,0);
+    MatText(3,315,"Дата исправления",true);
+    MatCol(3,385,"",0,CorrDate,false,0);
+    MatText(4,32,"Исправление записи",true);
+    MatColTL(4,215,"",0,M4AppCode,Normal,0,CorrNr,false,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,32,"Счет",0,AccNumber,false,AccSClass);
+    if (HasObjects) then begin
+      MatCol(1,98,"Объекты",0,Objects,false,ObjSClass);
+    end else begin
+      MatCol(1,-550,"Описание",0,Comment,false,0);
+    end;
+    if (HasBase2) then begin
+      MatCol(1,-400,"Валюта",0,Curncy,false,CurncyCodeSClass);
+      MatCol(1,-350,"Курс осн.1",0,BaseRate1,true,0);
+      MatCol(1,-280,"Курс осн.2",0,BaseRate2,true,0);
+    end else begin
+      MatCol(1,-300,"Валюта",0,Curncy,false,CurncyCodeSClass);
+    end;
+    MatCol(1,-210,"За...ед.",0,FrRate,true,0);
+    MatCol(1,-140,"по кур.1",0,ToRateB1,true,0);
+    if (HasBase2) then begin
+      MatCol(1,-70,"по кур.2",0,ToRateB2,true,0);
+    end;
+    MatText(2,32,"Подпись",true);
+    MatCol(2,108,"",0,Sign,false,0);
+    MatText(2,160,"Дата старой записи",true);
+    MatColTL(2,290,"",0,-1,ViewOnly,-1,OldTransDate,false,0);
+    MatText(3,32,"Исправлено записью",true);
+    MatColTL(3,215,"",0,M4AppCode,ViewOnly,0,CorrNr,false,0);
+    MatText(3,315,"Дата исправления",true);
+    MatCol(3,385,"",0,CorrDate,false,0);
+    MatText(4,32,"Исправление записи",true);
+    MatColTL(4,215,"",0,M4AppCode,Normal,0,CorrNr,false,0);
+  end;
+  if (IsEnterprise) then begin
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,32,"T",0,Typ,false,SetSClass);
+    MatCol(1,52,"Номер",0,SerNr,false,ARSClass);
+    MatCol(1,112,"Срок опл.",0,DueDate,false,PasteCurDate);
+    MatCol(1,184,"Наимен.",0,CompCode,false,CUSClass);
+    if (HasExtraNLComment) then begin
+      MatCol(1,-550,"Комментарий",0,Comment,false,0);
+      MatCol(1,-410,"Дополнительный комментарий",0,ExtraComment,false,0);
+    end else begin
+      MatCol(1,-400,"Коммент.",0,Comment,false,0);
+    end;
+    MatCol(1,-290,"Счет",0,AccNumber,false,AccSClass);
+    MatCol(1,-210,"Дебет",0,DebVal,true,0);
+    MatCol(1,-120,"Кредит",0,CredVal,true,0);
+    MatCol(1,-30,"НДС",0,VATCode,false,VATCodeSClass);
+    MatText(2,32,"Подпись",true);
+    MatCol(2,108,"",0,Sign,false,0);
+    MatText(2,160,"Дата старой записи",true);
+    MatColTL(2,290,"",0,-1,ViewOnly,-1,OldTransDate,false,0);
+    MatText(3,32,"Исправлено записью",true);
+    MatColTL(3,215,"",0,M4AppCode,ViewOnly,0,CorrNr,false,0);
+    MatText(3,315,"Дата исправления",true);
+    MatCol(3,385,"",0,CorrDate,false,0);
+    MatText(4,32,"Исправление записи",true);
+    MatColTL(4,215,"",0,M4AppCode,Normal,0,CorrNr,false,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,32,"Счет",0,AccNumber,false,AccSClass);
+    if (HasObjects) then begin
+      MatCol(1,98,"Объект",0,Objects,false,ObjSClass);
+    end;
+    if (HasExtraNLComment) then begin
+      MatCol(1,-590,"Комментарий",0,Comment,false,0);
+      MatCol(1,-450,"Additional Description",0,ExtraComment,false,0);  
+    end else begin
+      MatCol(1,-420," Коммент.",0,Comment,false,0);
+    end;
+    MatCol(1,-330,"Номинал",0,NomVal,true,0);
+    MatCol(1,-230,"Дебет",0,DebVal,true,0);
+    MatCol(1,-130,"Кредит",0,CredVal,true,0);
+    MatCol(1,-30,"Корр.",0,CorspSer,false,0);
+    MatText(2,32,"Подпись",true);
+    MatCol(2,108,"",0,Sign,false,0);
+    MatText(2,160,"Дата старой записи",true);
+    MatColTL(2,290,"",0,-1,ViewOnly,-1,OldTransDate,false,0);
+    MatText(3,32,"Исправлено записью",true);
+    MatColTL(3,215,"",0,M4AppCode,ViewOnly,0,CorrNr,false,0);
+    MatText(3,315,"Дата рег-ции",true);
+    MatCol(3,385,"",0,CorrDate,false,0);
+    MatText(4,32,"Исправление на запись",true);
+    MatColTL(4,215,"",0,M4AppCode,Normal,0,CorrNr,false,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,32,"Счет",0,AccNumber,false,AccSClass);
+    if (HasObjects) then begin
+      MatCol(1,98,"Объекты",0,Objects,false,ObjSClass);
+    end;
+    if (HasExtraNLComment) then begin
+      MatCol(1,-550,"Комментарий",0,Comment,false,0);
+      MatCol(1,-380,"Дополнительный комментарий",0,ExtraComment,false,0);
+    end else begin
+      MatCol(1,-420,"Комментарий",0,Comment,false,0);
+    end;
+    if (StandardHansa==false) then begin
+      MatCol(1,-260,"Налог. счет",0,TAccNumber,false,TAccSClass);
+      MatCol(1,-180,"Количество",0,Qty,true,0);
+      MatCol(1,-100,"SAFT тип",0,SAFTType,false,SetSClass);
+    end;
+    MatText(2,32,"Подпись",true);
+    MatCol(2,108,"",0,Sign,false,0);
+    MatText(2,160,"Дата старой записи",true);
+    MatColTL(2,290,"",0,-1,ViewOnly,-1,OldTransDate,false,0);
+    MatText(3,32,"Исправлено записью",true);
+    MatColTL(3,215,"",0,M4AppCode,ViewOnly,0,CorrNr,false,0);
+    MatText(3,315,"Дата рег-ции",true);
+    MatCol(3,385,"",0,CorrDate,false,0);
+    MatText(4,32,"Исправление на запись",true);
+    MatColTL(4,215,"",0,M4AppCode,Normal,0,CorrNr,false,0);
+  end;
+  InsertRowTest;
+  DeleteRowTest;
+  EndMatrix;
+  vs = 20;
+  v = vm + 1;
+  if (flipnr>2) then begin
+    for (f=1;f<flipnr;f=f+1) begin
+      VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1));
+      v = v + vs;
+    end;
+  end;
+  if (GuiType==kGuiMetro) then begin // Temporarily disabled on Windows 8
+    SpecialMenu("Сбалансировать",'B',0,"BalanceTRDsm");
+    SpecialMenu("Поменять дебет и кредит",' ',1,"SwapDCTRDsm");
+    SpecialMenu("Отметка об исправлении",' ',3,"CorrectionMarkTRDsm");
+    SpecialMenu("Открыть запись подсистемы",'t',6,"OpenSubsystemTRDsm");
+    if (HasMultiCurrency) then begin
+      SpecialMenu("Обновить курсы валют",' ',7,"UpdCurRateTRDsm");
+    end;
+  end else begin
+  SpecialMenu("Сбалансировать",'B',0,"BalanceTRDsm");
+  SpecialMenu("Поменять дебет и кредит",' ',1,"SwapDCTRDsm");
+  if (GuiType!=kGuiMetro or HasMetroTestFeatures) then begin//UGLY and tmp
+    SpecialMenu("Отметка об изменении",' ',2,"UpdateMarkTRDsm");
+  end;
+  SpecialMenu("Отметка об исправлении",' ',3,"CorrectionMarkTRDsm");
+  SpecialMenu("Рассчитать поле",'F',4,"CalcFieldTRDsm");
+  SpecialMenu("Поменять знак",' ',5,"ChangeSignTRDsm");
+  SpecialMenu("Открыть запись подсистемы",'t',6,"OpenSubsystemTRDsm");
+  if (HasMultiCurrency) then begin
+    SpecialMenu("Обновить курсы валют",' ',7,"UpdCurRateTRDsm");
+  end;
+    SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);         
+    SpecialMenu("Добавить счёт",' ',0,"AddAccountQTDsm");         
+  end;
+  EndWindow;
+end;
+
+window StockMovDClass:1
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,h2,h3,h4,v,vm,vs;
+  Integer tilenr,f,flipnr;
+
+  WindowBegin("Перемещение складированных товаров",StockMovDClass,CGview,-);
+  if (HasJewelleryInterface) then begin
+    SetWRect(20,80,850,400);
+  end else begin
+    SetWRect(20,80,700,400);
+  end;
+  Sizeable(-1,-1,0,0);
+  UseView(StockMovVc);
+  ActiveFieldOnNew("SentTransDate");
+  Tile(0,90,false,"",TransDate);
+  v = 6; vs = 20; h = 110; h2 = 300; h3 = 500; h4 = 620;
+  EditField(h,v,80, "Номер",Normal,SerNr,false,TSerSClass);
+  CheckBox(h2,v,0,"Зарезервировано",Reserved);
+  EditField(h3,v,80,"Причина",Normal,Reason,false,StandProblemsSClass);
+  EditField(h,v+=vs,80,"Дата заказа",Normal,OrdTransDate,false,PasteCurDate);
+  if (HasMultiLocations) then begin
+    if (IsEnterprise) then begin
+  //EditField(h2,v,80,"Дата отправки",Normal,SentTransDate,false,PasteCurDate);// Edit ************************** Tuesday, 7 March 2017 14:01:31
+    end;
+  end;
+  EditField(h3,v,80,"Дата получения",Normal,TransDate,false,PasteCurDate);
+  if (HasMultiLocations) then begin
+    EditField(h,v+=vs,80, "Со склада",Normal,FrLocation,false,LocationSClass);
+    if (IsEnterprise) then begin
+    //EditField(h2,v,80,"через склад",Normal,ThrouLocation,false,LocationSClass);// Edit ************************** Tuesday, 7 March 2017 14:01:20
+    end;
+    EditField(h3,v,80,"на склад",Normal,ToLocation,false,LocationSClass);
+  end;
+  tilenr = 1;
+  if (HasPositions or HasModWHM or HasLocalization("PRT")) then begin
+    TileButton(tilenr,"Позиции"); tilenr = tilenr + 1;
+  end;
+  if (HasObjects) then begin
+    TileButton(tilenr,"Объекты"); tilenr = tilenr + 1;
+  end else begin
+    TileButton(tilenr,"Коммент."); tilenr = tilenr + 1;
+  end;
+  TileButton(tilenr,"Товары"); tilenr = tilenr + 1;
+  if (HasMultiCurrency or HasBase2) then begin
+    TileButton(tilenr,"Валюта"); tilenr = tilenr + 1;
+  end;
+  TileButton(tilenr,"Длит-ти"); tilenr = tilenr + 1;
+  TileButton(tilenr,"Фрахт"); tilenr = tilenr + 1;
+  TileButton(tilenr,"Адрес"); tilenr = tilenr + 1;
+  tilenr = 1;
+  if (HasPositions or HasModWHM or HasLocalization("PRT")) then begin
+    Tile(tilenr,60,false,tilenr,FrPos); tilenr = tilenr + 1;
+    v = 6;
+    if (HasPositions) then begin
+      EditField(h,v,80, "С места",Normal,FrPos,false,UsedPosSClass);
+      EditField(h2,v,80,"на место",Normal,ToPos,false,FreePosSClass);
+    end;
+    if (HasModProd) then begin
+      EditField(h3,v,80,"Для производства",Normal,ProdSerNr,false,ProdSClass); v = v + vs;
+      EditField(h3,v,150,"Маршрут",Normal,Sorting,false,DelRouteSClass); v = v + vs;
+    end;
+    if ((HasLocalization("PRT") and HasModIN and HasMultiLocations) or IsStandardProduct==false) then begin 
+      EditField(h3,v,150,"Тип",Normal,StockMovType,false,SetSClass); v = v + vs;
+    end;
+    if (HasModWHM) then begin
+      v = 6 + vs;
+      CheckBox(h,v,0,"Вручную",ManualPick);
+      CheckBox(h,v+=16,0,"Послать на очередь погрузчика",ToForkLiftQue);
+    end;
+  end;
+  Tile(tilenr,70,false,tilenr,Comment); tilenr = tilenr + 1;
+  v = 6;
+  if (HasObjects) then begin
+    EditField(h,v,-20,"Объекты",Normal,Objects,false,ObjSClass);
+    v = v + vs;
+  end;
+  EditField(h,v,-20,"Коммент.",Normal,Comment,false,0);
+  EditField(h,v+=vs,135,"Оф. серийн. номер",Normal,OfficialSerNr,false,LegalInvNrSClass);
+  EnterSkip(Math);
+  Tile(tilenr,79,true,tilenr,Math); tilenr = tilenr + 1;
+  v = 24;
+  MatrixBegin(4,v,-50,-50,-,199);
+  Flip(0);
+  flipnr = 1;
+  if (HasJewelleryInterface) then begin
+    MatCol(1,32,"Серийный номер",0,SerialNr,false,SerialNrSClass);
+    EnterSkip(Quant);
+    MatCol(1,130,"Товар",0,ArtCode,false,INSClass);
+    Flip(flipnr); flipnr = flipnr + 1;
+    if (HasVarieties) then begin
+      MatCol(1,250,"Треб. кол-во",0,OrdQuant,true,MATVARINSClass);
+    end else begin
+      if (HasThrouLocation) then begin
+      MatCol(1,250,"Треб. кол-во",0,OrdQuant,true,0);
+    end;
+    end;
+    if (HasThrouLocation) then begin
+    //MatCol(1,250,"Отправ. кол-во",0,SentQuant,true,0);// Edit ************************** Tuesday, 7 March 2017 14:01:52
+    end;
+    MatCol(1,250,"Получ. кол-во",0,Quant,true,0);
+    MatCol(1,300,"Описание",0,Spec,false,0);
+  end else begin
+    MatCol(1,32,"Товар",0,ArtCode,false,INSClass);
+    Flip(flipnr);  flipnr = flipnr + 1;
+    if (HasVarieties) then begin
+      MatCol(1,86,"Треб.кол.",0,OrdQuant,true,MATVARINSClass);
+    end else begin
+      if (HasThrouLocation) then begin
+      MatCol(1,86,"Треб.кол.",0,OrdQuant,true,0);
+    end;
+    end;
+    if (HasThrouLocation) then begin
+    //MatCol(1,148,"Отпр.кол.",0,SentQuant,true,0);// Edit ************************** Tuesday, 7 March 2017 14:02:00
+    end;
+    MatCol(1,148,"Получ.кол.",0,Quant,true,0);
+    MatCol(1,210,"Наименование",0,Spec,false,0);
+  end;
+  MatCol(1,-220,"Старая цена",0,OldPrice,true,0);
+  MatCol(1,-140,"Накл. расх.",0,ExtraSCost,true,0);
+  MatCol(1,-70,"Новая цена",0,NewPrice,true,0);
+  Flip(flipnr); flipnr = flipnr + 1;
+  if (HasVarieties) then begin
+    MatCol(1,86,"Треб.кол.",0,OrdQuant,true,MATVARINSClass);
+  end else begin
+    if (HasThrouLocation) then begin
+    MatCol(1,86,"Треб.кол.",0,OrdQuant,true,0);
+  end;
+  end;
+  if (HasThrouLocation) then begin
+  //MatCol(1,148,"Отпр.кол.",0,SentQuant,true,0);// Edit ************************** Tuesday, 7 March 2017 14:02:10
+  end;
+  MatCol(1,148,"Получ.кол.",0,Quant,true,0);
+  MatCol(1,210,"Наименование",0,Spec,false,0);
+  MatCol(1,-220,"Старая цена",0,SentOldPrice,true,0);
+  MatCol(1,-140,"Накл. расх.",0,SentExtraSCost,true,0);
+  MatCol(1,-70,"Новая цена",0,SentNewPrice,true,0);
+  Flip(flipnr); flipnr = flipnr + 1;
+  MatCol(1,86,"Наименование",0,Spec,false,0);
+  if (HasObjects) then begin
+    MatCol(1,-380,"Объекты",0,Objects,false,ObjSClass);
+  end;
+  if (HasSerialNumbers) then begin
+    MatCol(1,-280,"Серийный номер",0,SerialNr,false,SerialNrSClass);
+  end;
+  MatCol(1,-140,"Отпускн. цена",0,BasePrice,true,0);
+  MatCol(1,-40,"Коэфф.",0,Coefficient,false,0);
+  Flip(flipnr); flipnr = flipnr + 1;
+  MatCol(1,86,"Наименование",0,Spec,false,0);
+  if (HasSerialNumbers) then begin
+    MatCol(1,-280,"Серийный номер",0,SerialNr,false,SerialNrSClass);
+  end;
+  MatCol(1,-135,"Ширина",0,UnitXval,true,0);
+  MatCol(1,-90,"Высота",0,UnitYval,true,0);
+  MatCol(1,-45,"Глубина",0,UnitZval,true,0);
+  if (HasPositions) then begin
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,86,"Наименование",0,Spec,false,0);
+    MatCol(1,-180,"С места",0,FrPosCode,false,UsedPosSClass);
+    MatCol(1,-90,"На место",0,ToPosCode,false,FreePosSClass);
+  end;
+  DeleteRowTest;
+  RowMenuBegin("");         
+  RowMenuItem(0,"Статус товара",'I','I',0,"ItemStatusStockMovDsm");         
+  if (HasQualityControl) then begin
+    RowMenuItem(0,"Контроль качества",'u','u',0,"QualConFromStockMovDsm");         
+  end;
+  EndRowMenu;
+  EndMatrix;
+  vs = 20;
+  v = 18;
+  if (flipnr>2) then begin
+    for (f=1;f<flipnr;f=f+1) begin
+      VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1));
+      v = v + vs;
+    end;
+  end;
+  if (HasThrouLocation) then begin
+  CheckBox(20,-52,0,"Подтверждено",OrdFlag);
+  //CheckBox(20,-36,0,"Отправлено",SentOKFlag);// Edit ************************** Tuesday, 7 March 2017 14:30:01
+  end;
+  CheckBox(20,-20,0,"Получено",OKFlag);
+  if (HasThrouLocation) then begin
+  //EditField(170,-20,62,"Отпр. к-во",Normal,TotSentQty,true,0);// Edit ************************** Tuesday, 7 March 2017 14:30:03
+  end;
+  EditField(310,-20,62,"Получ. к-во",Normal,TotQty,true,0);
+  if (HasLocalization("HRV,PRT")) then begin
+    EditField(550,-40,150,"Tax Seal",ViewOnly,TaxAdminServSeal,false,0);
+//    SoftEditField(550,-40,150,"Tax Auth. Approval",Normal,"TaxAdminServSeal",false,0,M4Str,200);
+  end;
+  /*EditField(200,-60,100,"FrLocOKNr",Normal,FrLocOKNr,true,0);
+	EditField(400,-60,100,"ToLocOKNr",Normal,ToLocOKNr,true,0);
+	EditField(200,-40,100,"FrThrouLocOKNr",Normal,FrThrouLocOKNr,true,0);
+	EditField(400,-40,100,"ToThrouLocOKNr",Normal,ToThrouLocOKNr,true,0);*/
+  EditField(550,-20,100,"Неучт. накладные расходы",Normal,OtherExtraCosts,false,0);
+  if (HasMultiCurrency or HasBase2) then begin
+    Tile(tilenr,70,false,tilenr,FrRate); tilenr = tilenr + 1;
+    h1 = 110; vs = 20;
+    if (HasBase2) then begin
+      h1 = h1 + 20;
+    end;
+    EditField(h1,v=6,50,"Валюта",Normal,CurncyCode,false,CurncyCodeSClass);
+    if (HasMultiCurrency) then begin
+      if (HasBase2) then begin
+        EditField(h1,v+vs,50,"Осн. валюта 1",Normal,BaseRate1,true,0);
+      end else begin
+        EditField(h1,v+vs,50,"Осн. валюта",Normal,BaseRate1,true,0);
+      end;
+      if (HasBase2) then begin  
+        EditField(h1,v+(vs*2),50,"Осн. валюта 2",Normal,BaseRate2,true,0);  
+      end;
+      EditField(h2=295,v,50,"Курс",Normal,FrRate,true,0);  
+      if (HasBase2) then begin  
+        RateField(h3=360,v,50,":",Normal,"ToRateB1",true,h3+60,v+14,"Осн. валюта 1",false);  
+        RateField(h3,v+=vs,50,":",Normal,"ToRateB2",true,h3+60,v+14,"Осн. валюта 2",false);            
+      end else begin
+        RateField(h3=360,v,50,":",Normal,"ToRateB1",true,h3+60,v+14,"Осн. валюта",false);      
+      end;
+    end else begin
+      EditField(h1,v+=vs,50,"Осн. валюта 1",Normal,BaseRate1,true,0);
+      EditField(h1,v+=vs,50,"Осн. валюта 2",Normal,BaseRate2,true,0);
+    end;
+  end;
+  Tile(tilenr,110,false,tilenr,PlanSendDate); tilenr = tilenr + 1;
+  vs = 20; h1 = 130; h2 = 330; h3 = 560;
+  EditField(h,v=6,80,"План. дата отпр.",Normal,PlanSendDate,false,PasteCurDate);
+  EnterSkip(PlanSendTime);
+  if (HasLocalization("PRT")==false or IsStandardProduct==false) then begin 
+  	EditField(h2,v,40,"План. длит., дней",ViewOnly,PlanDurationDays,false,0);
+  end;
+  EditField(h,v+=vs,80,"План. время отпр.",Normal,PlanSendTime,false,PasteCurTime);
+  EnterSkip(PlanArrDate);
+  if (HasLocalization("PRT")==false or IsStandardProduct==false) then begin 
+  	EditField(h2,v,80,"План. длит., часов",ViewOnly,PlanDurationTime,false,0);
+  end;	
+  EditField(h3,v=6,80,"План. дата прибытия",Normal,PlanArrDate,false,PasteCurDate);
+  EditField(h3,v+=vs,80,"План. время прибытия",Normal,PlanArrTime,false,PasteCurTime);
+  if (HasLocalization("PRT")==false or IsStandardProduct==false) then begin 
+  	EditField(h,vm=(v+=32),80,"Фактич. дата отпр.",Normal,ActSendDate,false,PasteCurDate);
+  	EnterSkip(ActSendTime);
+  	EditField(h2,v,40,"Фактич. длит., дней",ViewOnly,ActDurationDays,false,0);
+  	EditField(h,v+=vs,80,"Фактич время отпр.",Normal,ActSendTime,false,PasteCurTime);
+  	EnterSkip(ActArrDate);
+  	EditField(h2,v,80,"Фактич. длит., часов",ViewOnly,ActDurationTime,false,0);
+  	EditField(h3,v=vm,80,"Фактич. дата прибытия",Normal,ActArrDate,false,PasteCurDate);
+  	EditField(h3,v+=vs,80,"Фактич. время прибытия",Normal,ActArrTime,false,PasteCurTime);
+  end;
+  Tile(tilenr,110,false,tilenr,FreightCode); tilenr = tilenr + 1;
+  vs = 20; h2 = 255;
+  EditField(h=130,v=6,60,"Трансп. компания",Normal,FreightCode,false,FreightCompanySClass);
+  EditField(h2,v,-40,"ИНН",Normal,FreightCompanyRegNr,false,0);
+  EditField(h,v+=vs,-40,"Название",Normal,FreightCompany,false,0);
+  EditField(h,v+=vs,-40,"Инф-ия о машине",Normal,TruckInfo,false,0);
+  EditField(h,v+=vs,-40,"Водитель",Normal,Driver,false,0);
+  EditField(h,v+=vs,-40,"ТТН",Normal,CMRText,false,0);
+  if (HasNumberSeries and HasLocalization("PRT")) then begin  
+    if (HasOfficialSerNr) then begin
+      EditField(h,v+=vs,100,"Official Ser No. 2",Normal,OfficialSerNr2,false,0);  
+      EditField(h2+100,v,135,"Статус",Normal,Status,false,SetSClass);  
+    end;    
+  end;
+  Tile(tilenr,200,false,tilenr,FrAddr0); tilenr = tilenr + 1;
+  vs = 20; h2 = 255;
+  EditField(h=130,v=6,-40,"C адресв",Normal,FrAddr0,false,0);
+  EditField(h,v+=vs,-40,"",Normal,FrAddr1,false,0);
+  EditField(h,v+=vs,-40,"",Normal,FrAddr2,false,0);
+  EditField(h,v+=vs,-40,"",Normal,FrAddr3,false,0);
+  EditField(h,v+=vs,-40,"",Normal,FrAddr4,false,0);
+  if (HasThrouLocation) then begin
+  EditField(h,v+=vs,-40,"Через адрес",Normal,ThrouAddr0,false,0);
+  EditField(h,v+=vs,-40,"",Normal,ThrouAddr1,false,0);
+  EditField(h,v+=vs,-40,"",Normal,ThrouAddr2,false,0);
+  EditField(h,v+=vs,-40,"",Normal,ThrouAddr3,false,0);
+  EditField(h,v+=vs,-40,"",Normal,ThrouAddr4,false,0);
+  end;
+  EditField(h,v+=vs,-40,"На адрес",Normal,ToAddr0,false,0);
+  EditField(h,v+=vs,-40,"",Normal,ToAddr1,false,0);
+  EditField(h,v+=vs,-40,"",Normal,ToAddr2,false,0);
+  EditField(h,v+=vs,-40,"",Normal,ToAddr3,false,0);
+  EditField(h,v+=vs,-40,"",Normal,ToAddr4,false,0);
+  SpecialMenu("Стоимость в старой цене за единицу",'=',0,"StockMovFillFIFODsm");
+  SpecialMenu("Поиск товара",'f',1,"ItemSearchDsm");
+  if (HasModNL) then begin
+    SpecialMenu("Открыть запись операции отправки",' ',2,"OpenTRFromStockMovSent");
+    SpecialMenu("Открыть запись операции получения",'t',3,"OpenTRFromStockMov");
+  end;
+  if (HasLocalization("PRT")) then begin
+    if (HasETaxDocuments) then begin
+      SpecialMenu("Send to Tax Authorities",'',10,"EShipPRTDsm");  
+    end;
+  end;  
+  EndWindow;
+end;
+
+window SHDClass:1
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h1,h2,h3,h4,t,v,vm,vs;
+  Integer tilenr,f,flipnr,rn;
+
+  WindowBegin("Отгрузка",SHDClass,CGview,-);
+  SetWRect(20,80,750,460);
+  Sizeable(-1,-1,0,0);
+  UseView(SHVc);
+  vs = 20;
+  Tile(0,74,false,"",SerNr);
+  EditField(75,vm=(v=6),95,"№",Normal,SerNr,false,TSerSClass);
+  EditField(75,v+=20,95,"Получатель",ViewOnly,CustCode,false,0);
+  EditField(h=255,v=vm,-40,"Наим.",Normal,Addr0,false,0);
+  v = v + vs;
+  if (HasOfficialSerNr and (HasLocalization("AGO")==false)) then begin
+    EditField(h,vm=v,135,"Офиц. номер",Normal,OfficialSerNr,false,LegalInvNrSClass);
+  end;
+  if (HasTREO) then begin
+    EditField(h+230,vm,95,"TREO Но.",Normal,TREONr,false,0);
+  end;
+  CheckBox(h4=-100,v,0,"OK",OKFlag);
+  tilenr = 1;
+  if (IsEnterprise) then begin
+    TileButton(tilenr,"Условия"); tilenr = tilenr + 1;
+    TileButton(tilenr,"Товары"); tilenr = tilenr + 1;
+    TileButton(tilenr,"Условия дост."); tilenr = tilenr + 1;
+    TileButton(tilenr,"Упаковка"); tilenr = tilenr + 1;
+    TileButton(tilenr,"Адрес доставки"); tilenr = tilenr + 1;  
+    TileButton(tilenr,"Комментарий"); tilenr = tilenr + 1;  
+    if (StandardHansa==false) then begin
+      TileButton(tilenr,"Фрахт"); tilenr = tilenr + 1;
+    end;
+  end else begin
+    TileButton(tilenr,"Коммент."); tilenr = tilenr + 1;
+    TileButton(tilenr,"Товары"); tilenr = tilenr + 1;
+    TileButton(tilenr,"Адрес"); tilenr = tilenr + 1;
+    if (HasLocalization("PRT")) then begin
+      if (HasModIN and HasModSL) then begin 
+        TileButton(tilenr,"Packaging"); tilenr = tilenr + 1;   
+      end;
+      TileButton(tilenr,"Фрахт"); tilenr = tilenr + 1;
+    end;
+  end;
+  tilenr = 1;
+  Tile(tilenr,70,false,tilenr,ShipDate); tilenr = tilenr + 1;
+  vs = 20; h1 = 110; h2 = 290; h3 = 530; h4 = -100;
+  EditField(h1,vm=(v=6),82,"Дата",Normal,ShipDate,false,PasteCurDate);
+  if (HasMultiLocations) then begin
+    v = v + vs;
+    EditField(h1,v,82,"Склад",Normal,Location,false,LocationSClass);
+  end;
+  if (HasRoute) then begin
+    v = v + vs;
+    EditField(h1,v,82,"Маршрут",Normal,Sorting,false,DelRouteSClass);
+  end;
+  if (IsEnterprise) then begin
+    v = v + vs;
+    SoftEditField(h1,v,82,"Скан.штрих-код",Normal,"scanbarcode",false,0,M4Str,60); 
+  end;
+  if (HasObjects) then begin
+    EditField(h2,v=vm,135,"Объекты",Normal,Objects,false,ObjSClass);
+  end;
+  if (HasBranch) then begin
+    v = v + vs;
+    EditField(h2,v,135,"Филиал",ViewOnly,BranchID,false,0);
+  end;
+  if (HasMultiLocations) then begin
+    v = v + vs;
+  end;
+  if (HasModTS) then begin
+    EditField(h2,v,135,"Проект",ViewOnly,PRCode,false,0);
+  end;
+  if (HasObjects) then begin
+    EditField(h3,v=vm,80,"Счёт №",ViewOnly,OrderNr,false,0);
+  end else begin
+    if (IsEnterprise==false) then begin
+      if (HasModTS) then begin
+        EditField(h3,v=vm,135,"№ счёта",ViewOnly,OrderNr,false,0); 
+      end else begin
+      EditField(h2,v=vm,135,"Номер заказа",ViewOnly,OrderNr,false,0);
+      end;
+    end;
+  end;
+  if (IsEnterprise) then begin
+    EditField(h3,v+=vs,80,"Вид счёта",Normal,SHClass,false,OrderClassSClass);
+    CheckBox(h4,v=6,0,"Сообщение",Check1);
+  end;
+  if (IsEnterprise==false) then begin
+    if (HasMultiLocations) then begin
+      EditField(h1,v+=2*vs,-40,"Коммент.",Normal,Comment,false,0);
+    end else begin
+      EditField(h1,v+=vs,-40,"Коммент.",Normal,Comment,false,0);
+    end;
+    if (HasLanguages) then begin 
+      EditField(h1,v+=vs,82,"Язык",Normal,LangCode,false,LangSClass);         
+    end;      
+  end;
+  Tile(tilenr,190,true,tilenr,Math); tilenr = tilenr + 1;
+  v = 20;
+  MatrixBegin(4,v,-50,-35,-,200);
+  MatTypedRow(stp);
+  Flip(0);
+  MatCol(1,32,"Товар",0,ArtCode,false,ForSaleINSClass);
+//  MatCol(1,94,"Var",0,VARList,false,VARSClass);
+//  MatCol(1,144,"Описание",0,Spec,false,0);
+  MatCol(1,170,"Наименование",0,Spec,false,0);
+  MatCol(t=kInvoiceRowTypeStructuredItemComponent,32,"Товар",0,ArtCode,false,ForSaleINSClass);
+//  MatCol(t,94,"Var",0,VARList,false,VARSClass);
+//  MatCol(t,144,"Описание",0,Spec,false,0);
+  MatCol(t,170,"Наименование",0,Spec,false,0);
+  flipnr = 1;
+  Flip(flipnr); flipnr = flipnr + 1;
+  if (HasCustItem) then begin
+    MatCol(1,-160,"Товар кл.",0,CustArtCode,false,CUINSClass);
+  end;
+  MatCol(1,-120,"Зак.",0,Ordered,true,0);
+  MatCol(1,-80,"Скл.",0,InStock,true,0);
+  MatCol(1,-40,"Своб.",0,Ship,true,0);
+  if (HasCustItem) then begin
+    MatCol(t=kInvoiceRowTypeStructuredItemComponent,-230,"Код товара кл.",0,CustArtCode,false,CUINSClass);
+    MatCol(t,-150,"Заказано",0,Ordered,true,0); 
+  end else begin
+    MatCol(t=kInvoiceRowTypeStructuredItemComponent,-147,"Заказано",0,Ordered,true,0); 
+  end;
+  MatCol(t,-98,"Скл.",0,InStock,true,0);
+  MatCol(t,-50,"Своб.",0,Ship,true,0);
+  Flip(flipnr); flipnr = flipnr + 1;
+  if (IsEnterprise==false) then begin
+    if (HasSerialNumbers) then begin
+      MatCol(1,-350,"Серийный номер",0,SerialNr,false,SerialNrSClass);
+    end;
+    if (HasObjects) then begin
+      MatCol(1,-250,"Объекты",0,Objects,false,ObjSClass);
+    end;
+    MatCol(1,-98,"Знач. склада",0,FIFORowVal,false,0);
+    if (HasLocalization("RUS")) then begin  
+      Flip(flipnr); flipnr = flipnr + 1;
+      MatCol(1,-230,"Ед-ца",0,UnitCode,false,UnitSClass);  
+      MatCol(1,-180,"Название",0,UnitComment,false,0);  
+    end;
+  end else begin
+    MatCol(1,-350,"Серийный номер",0,SerialNr,false,SerialNrSClass);
+    MatCol(1,-250,"Срок годности",0,BestBefore,false,0);
+    MatCol(1,-150,"Склад",0,Location,false,LocationSClass);
+    if (HasPositions) then begin
+      MatCol(1,-50,"Место",0,PosCode,false,UsedPosSClass);
+    end;
+    MatCol(t=kInvoiceRowTypeStructuredItemComponent,-350,"Серийный номер",0,SerialNr,false,SerialNrSClass);
+    MatCol(t,-250,"Срок годности",0,BestBefore,false,0);
+    MatCol(t,-150,"Склад",0,Location,false,LocationSClass);
+    if (HasPositions) then begin
+      MatCol(t,-50,"Место",0,PosCode,false,UsedPosSClass);
+    end;
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,-400,"Ц.обр.закупки",0,BBCostPrice,false,0);
+    MatCol(1,-320,"FIFO по строке",0,FIFORowVal,false,0);
+    if (StandardHansa==false) then begin
+      MatCol(1,-220,"Ср. взв.(вал.2)",0,WAB2,false,0);
+    end;
+    MatCol(1,-120,"Отпускная ц.",0,BasePrice,false,0);
+    MatCol(1,-40,"Коэфф.",0,Coefficient,false,0);
+    MatCol(t=kInvoiceRowTypeStructuredItemComponent,-400,"BuyBack Pr.",0,BBCostPrice,false,0);
+    MatCol(t,-320,"FIFO по строке",0,FIFORowVal,false,0);
+    if (StandardHansa==false) then begin
+      MatCol(t,-220,"Ср. взв.(вал.2)",0,WAB2,false,0);
+    end;
+    MatCol(t,-120,"Отпускная цена",0,BasePrice,false,0);
+    MatCol(t,-40,"Коэфф.",0,Coefficient,false,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,-400,"Структура",0,Recepy,false,0);
+    MatCol(1,-320,"Источник",0,Source,false,SourceSClass);
+    MatCol(1,-240,"Отфактурирован",0,Invd,false,0);
+    if (StandardHansa==false) then begin
+      MatCol(1,-160,"Дата отправки",0,DespatchRowDate,false,PasteCurDate);
+      MatCol(1,-80,"Время отправки",0,DespatchRowTime,false,PasteCurTime);
+    end;
+    MatCol(t=kInvoiceRowTypeStructuredItemComponent,-400,"Структура",0,Recepy,false,0);
+    MatCol(t,-300,"Источник",0,Source,false,SourceSClass);
+    MatCol(t,-240,"Отфактурирован",0,Invd,false,0);
+    if (StandardHansa==false) then begin
+      MatCol(t,-160,"Дата отправки",0,DespatchRowDate,false,PasteCurDate);
+      MatCol(t,-80,"Время отправки",0,DespatchRowTime,false,PasteCurTime);
+    end;
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(1,-400,"Счёт реал.",0,SalesAcc,false,AccSClass);
+    MatCol(1,-330,"Счёт стоим.",0,CostAcc,false,AccSClass);
+    MatCol(1,-250,"Объекты",0,Objects,false,ObjSClass);
+    MatCol(1,-135,"Шир.",0,UnitXval,true,0);
+    MatCol(1,-90,"Выс.",0,UnitYval,true,0);
+    MatCol(1,-45,"Выс.",0,UnitZval,true,0);
+    MatCol(t=kInvoiceRowTypeStructuredItemComponent,-400,"Счёт реал.",0,SalesAcc,false,AccSClass);
+    MatCol(t,-330,"Счёт стоим.",0,CostAcc,false,AccSClass);
+    MatCol(t,-250,"Объекты",0,Objects,false,ObjSClass);
+    MatCol(t,-135,"Шир.",0,UnitXval,true,0);
+    MatCol(t,-90,"Выс.",0,UnitYval,true,0);
+    MatCol(t,-45,"Выс.",0,UnitZval,true,0);
+    if (StandardHansa==false) then begin
+      Flip(flipnr); flipnr = flipnr + 1;
+      MatCol(1,-300,"Упаковок",0,RowPackages,false,0);
+      MatCol(1,-220,"Тип",0,PackageType,false,PackTypeSClass);
+      MatCol(1,-170,"Описание",0,PackageDesc,false,0);
+      MatCol(1,-70,"Акциз",0,ExciseNr,false,0);
+      MatCol(t=kInvoiceRowTypeStructuredItemComponent,-300,"Упаковок",0,RowPackages,false,0);
+      MatCol(t,-220,"Тип",0,PackageType,false,PackTypeSClass);
+      MatCol(t,-170,"Описание",0,PackageDesc,false,0);
+      MatCol(t,-70,"Акциз",0,ExciseNr,false,0);
+    end;
+  end;
+  InsertRowTest;
+  DeleteRowTest;
+  RowMenuBegin("");         
+  RowMenuItem(0,"Статус товара",'I','I',0,"ItemStatusSHDsm");         
+  if (IsEnterprise) then begin
+    if (StandardHansa==false) then begin
+      RowMenuItem(0,"Разделить строку",' ',' ',0,"SplitRowSHDsm");
+    end;
+  end;
+  EndRowMenu;
+  EndMatrix;
+  vs = 22;
+//  v = 21;
+  v = v + 1;
+  if (flipnr>2) then begin
+    for (f=1;f<flipnr;f=f+1) begin
+      VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1));
+      v = v + vs;
+    end;
+  end;
+
+//  CheckBox(20,-20,0,"OK",OKFlag);
+  if (HasLocalization("PRT")) then begin
+    EditField(120,-20,150,"Tax Seal",ViewOnly,TaxAdminServSeal,false,0);
+//    SoftEditField(120,-20,150,"Tax Auth. Approval",Normal,"TaxAdminServSeal",false,0,M4Str,200);
+  end;
+ 	EditField(100,-20,80,"LocOKNr",Normal,LocOKNr,true,0); //!!PRODTRANSLATE// Edit ************************** Thursday, 3 September 2015 10:05:37
+
+  EditField(-131,-20,80,"Общее кол-во",ViewOnly,TotQty,true,0);
+  if (IsEnterprise) then begin
+    Tile(tilenr,90,false,tilenr,ShipMode); tilenr = tilenr + 1;
+    vs = 20;
+    EditField(h1,v=vm,82,"Способ отгр.",Normal,ShipMode,false,DMSClass);
+    EditField(h1,v+=vs,80,"Сумма налога",ViewOnly,TAX1Sum,true,0);
+    if (StandardHansa==false) then begin
+      EditField(h1,v+=vs,80,"Заявлен. значение",Normal,DeclaredVal,true,0);
+      EditField(h1,v+=vs,-20,"Статус отгрузки",ViewOnly,EShipStatus,false,0);
+      if (HasLocalization("BRA,BOL,PRT")) then begin  
+        EditField(h1,v+=vs,80,"Tax Seal",ViewOnly,TaxAdminServSeal,false,0);
+      end;
+    end;
+    EditField(h2,v=vm,80,"Итого кол-во",ViewOnly,TotQty,true,0);
+    EditField(h2,v+=vs,80,"Итого вес",Normal,TotWeight,true,0);
+    EditField(h2,v+=vs,80,"Итого объем",Normal,TotVolume,true,0);
+    CheckBox(473,v=vm,0,"Использовать адрес для выст. счета",Check2);
+    if (StandardHansa==false) then begin
+      CheckBox(473,v+=16,0,"Создана электронная отгрузка",EShipmentCreated);
+      CheckBox(473,v+=16,0,"Собрана электронная отгрузка",EShipCollected);
+    end;
+    Tile(tilenr,110,false,tilenr,Packages); tilenr = tilenr + 1;
+    h2 = 310;
+    EditField(h1,v=6,82,"Трансп. №",Normal,TransportNumber,false,0);
+    EditField(h1,v+=vs,82,"Упаковки",Normal,Packages,true,0);
+    if (HasLanguages) then begin 
+    EditField(h1,v+=vs,82,"Языка",Normal,LangCode,false,LangSClass);
+    end;  
+    EditField(h1,v+=vs,82,"Валюта",Normal,CurncyCode,false,CurncyCodeSClass);
+    if (StandardHansa==false) then begin
+      EditField(h1,v+=vs,-20,"Инстр.по трансп.",Normal,TransportDirect,false,0);
+      EditField(h1,v+=vs,80,"План. дата отпр.",Normal,PlanSendDate,false,PasteCurDate);
+      EditField(h1,v+=vs,80,"План. время отпр.",Normal,PlanSendTime,false,PasteCurTime);
+    end;
+
+    EditField(h2,v=6,135,"Из города",Normal,FromCity,false,0);
+    EditField(h2,v+=vs,135,"В город",Normal,ToCity,false,0);
+    EditField(h2,v+=vs,135,"Из дока",Normal,FromDock,false,0);
+    EditField(h2,v+=vs,135,"В док",Normal,ToDock,false,0);
+    if (StandardHansa==false) then begin
+      EditField(h2,v+=2*vs,80,"План. дата приб.",Normal,PlanArrDate,false,PasteCurDate);
+      EditField(h2,v+=vs,80,"План. время  приб.",Normal,PlanArrTime,false,PasteCurTime);
+    end;
+  end;
+  Tile(tilenr,150,false,tilenr,Addr1); tilenr = tilenr + 1;
+  vs = 20;
+  if (IsEnterprise) then begin
+    if (StandardHansa==false) then begin
+      EditField(h1,v=6,80,"Код адреса",Normal,DelAddrCode,false,DelAddr3SClass);
+      EditField(h1,v+=vs,-20,"Отгрузка",Normal,Addr1,false,0);
+    end else begin
+      EditField(h1,v=6,-20,"Адрес",Normal,Addr1,false,0);
+    end;
+    EditField(h1,v+=vs,-20,"Адрес",Normal,Addr2,false,0);
+  end else begin
+    EditField(h1,v=6,-20,"Адрес",Normal,Addr1,false,0);   // From dict
+    EditField(h1,v+=vs,-20,"",Normal,Addr2,false,0);
+  end;
+  EditField(h1,v+=vs,-20,"",Normal,Addr3,false,0);
+  EditField(h1,v+=vs,-20,"",Normal,DelAddr3,false,0);
+  EditField(h1,v+=vs,-20,"",Normal,DelAddr4,false,0);
+  if (HasCountryPerCustomer) then begin
+    EditField(h1,v+=vs,80,"Страны",Normal,DelCountry,false,CountrySClass);
+    if (HasLocalization("BRA")) then begin 
+      EditField(h2-109,v,232,"",ViewOnly,DelCountryName,false,0);
+    end;    
+  end;
+  if (IsEnterprise) then begin
+    EditField(h3,v,-20,"Регион",Normal,Region,false,RegionSClass);
+    Tile(tilenr,30,false,tilenr,Comment); tilenr = tilenr + 1;
+    EditField(h1+10,v=6,-20,"Комментарий",Normal,Comment,false,0);
+    EditField(h1+10,v+=20,-20,"Основание",Normal,ORCOType,false,0); // NEWTRANSLATE
+    if (HasNumberSeries and HasLocalization("PRT")) then begin  
+      if (HasOfficialSerNr) then begin
+        EditField(h1+10,v+=vs,100,"Official Ser No. 2",Normal,OfficialSerNr2,false,0);  
+        EditField(h2,v,135,"Статус",Normal,Status,false,SetSClass);  
+      end;    
+    end;
+  end else begin
+    if (HasLocalization("RUS")) then begin  
+      EditField(h1,v+=vs,80,"Итого вес",Normal,TotWeight,true,0);  
+    end;
+  end;
+  if (IsStandardProduct and HasLocalization("PRT") and HasModIN and HasModSL) then begin 
+    Tile(tilenr,110,false,tilenr,PlanSendDate); tilenr = tilenr + 1;
+    h2 = 310;
+    EditField(h1,v=6,80,"Plan. Sent Date",Normal,PlanSendDate,false,PasteCurDate);
+    EditField(h1,v+=vs,80,"Plan. Sent Time",Normal,PlanSendTime,false,PasteCurTime);
+    EditField(h2,v=6,80,"Plan. Arrival Date",Normal,PlanArrDate,false,PasteCurDate);
+    EditField(h2,v+=vs,80,"Plan. Arrival Time",Normal,PlanArrTime,false,PasteCurTime);      
+  end;
+  if (IsEnterprise or HasLocalization("PRT")) and (StandardHansa==false) then begin
+    Tile(tilenr,130,false,tilenr,FreightCode); tilenr = tilenr + 1;
+    if (IsEnterprise) then begin
+      HalPushButton(473,2,600,22,"UpdateSHPackages","Определить упаковку");
+    end;
+    EditField(h1,v=6,80,"Трансп. компания",Normal,FreightCode,false,FreightCompanySClass);
+    EditField(h1,v+=vs,-20,"Название",Normal,FreightCompany,false,0);
+    EditField(h1,v+=vs,-20,"ИНН",Normal,FreightCompanyRegNr,false,0);
+    EditField(h1,v+=vs,-20,"Инф-ия о машине",Normal,TruckInfo,false,0);
+    EditField(h1,v+=vs,-20,"Водитель",Normal,Driver,false,0);
+    EditField(h1,v+=vs,-20,"CMR",Normal,CMRText,false,0); // International transporting number
+  end;
+  if (GuiType==kGuiMetro) then begin // Temporarily disabled on Windows 8
+    SpecialMenu("Статус товара",'I',2,"ItemStatusSHDsm");
+    if (HasModNL) then begin
+      SpecialMenu("Открыть запись операции",'t',3,"OpenTRFromSH");
+    end;
+    SpecialMenu("Печать этикеток фрахта",'l',0,"PrintSHLabSHDsm");
+    if (HasReturnedGoods and HasModIN) then begin
+      SpecialMenu("Создать возврат товаров",'B',5,"RetFromSHSpec");
+    end;
+  end else begin
+  SpecialMenu("Печать этикеток фрахта",'l',0,"PrintSHLabSHDsm");
+  if (IsEnterprise) then begin
+    SpecialMenu("Пересчитать вес",'w',1,"SHCalcWeightDsm");
+  end;
+  if (HasModNL) then begin
+    SpecialMenu("Открыть запись операции",'t',3,"OpenTRFromSH");
+  end;
+  if (HasLocalization("SWE")) then begin
+    SpecialMenu("Экспорт ASG",' ',4,"ASGEnSHDsm"); /* Specific for Sweden */
+  end;
+  if (HasLocalization("NOR")) then begin
+    SpecialMenu("Winedi Export",' ',4,"WinEDIEnSHDsm"); /* Specific for Norway */
+  end;
+  if (HasLocalization("PRT")) then begin
+    if (HasETaxDocuments) then begin
+    SpecialMenu("Send to Tax Authorities",'',10,"EShipPRTDsm");  //tax authorities server is down
+    end;
+  end;
+  if (IsEnterprise) then begin
+    SpecialMenu("Заполнить серийные номера партий",' ',6,"INBatchSHSpec");
+  end;
+  if (HasModWHM) then begin
+    SpecialMenu("Утвердить складские перемещения",' ',8,"OKStockMovSHrDsm");
+    SpecialMenu("Список комплектаций по складу",' ',9,"PickingListDsm");
+  end;
+//  SpecialMenu("Calculate Manually",' ',10,"CalcSHMan"); /* Specific for one customer in Portugal, you may comment it out */
+  if (IsEnterprise) then begin
+    if (StandardHansa==false) then begin
+      SpecialMenu("Зарегестрировать электронную отгрузку",' ',9,"EShipRegisterDsm");
+    end;
+    if (GuiType==kGuiiPhone) then begin
+      SpecialMenu("Подписать",' ',10,"SignSHDsm");  
+    end;
+  end;
+  SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);         
+  if (HasModSL) then begin
+    SpecialMenu("Счёт-фактура",'F',1,"IVFromSHDsm"); 
+  end;
+  if (IsEnterprise or HasLocalization("PRT") or HasReturnedGoods) then begin         
+    SpecialMenu("Возращённые товары",'B',2,"RetFromSHDsm"); 
+  end;
+  end;
+  EndWindow;
+end;
+
+window SalesmanMonthSalesHistSMRClass:1
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vs;
+  WindowBegin("Определите историю оборота за месяц по продавцу",SalesmanMonthSalesHistSMRClass,CGRcW,RcType);
+  SetWRect(20,80,400,180);
+  v = 6; vs = 20; h = 180;
+  PeriodField(h,v,"Период");
+  EditFieldTL(h,v+=vs,100,"Продавец (на Клиенте)",M4UStr,Normal,100,f1,false,UserSClass);
+  CheckBox(h,v+=16,0,"Детализация по клиентам",flags[1]);
+
+  EndWindow;
+end;
+
+window WebShopSettingsTClass:1 //Edit***************************Sasha2,10:24 14.07.2014 {
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vs;
+  WindowBegin("Настройки WebShop",WebShopSettingsTClass,CGSbl,-);
+  SetBlid(WebShopSettingsBlock);
+  //SetWRect(10,80,470,270);
+  //v = 6; vs = 20; h = 180;
+  //EditField(h=250,v,-40,"Название исходящего файла для сохранения",Normal,FileName,false,0);
+
+  SetWRect(10,80,370,270);
+  v = 6; vs = 20; h = 150;
+  EditField(h,v,150,"Склад",Normal,Location,false,LocationSClass);
+  EditField(h,v+=vs,60,"Условия оплаты",Normal,PayDeal,false,PDSClass);
+  EditField(h,v+=vs,60,"Условия отгрузки",Normal,ShipDeal,false,ShipDealSClass);
+
+  EndWindow;
+end; //Edit***************************Sasha2,10:24 14.07.2014 }
+
+window ExportStockCSVTClass:1
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,v,vs;
+  WindowBegin("Настройки связи с Magento",ExportStockCSVTClass,CGSbl,-);
+  SetBlid(ExportStockCSVBlock);
+  //SetWRect(10,80,470,270);
+  //v = 6; vs = 20; h = 180;
+  //EditField(h=250,v,-40,"Название исходящего файла для сохранения",Normal,FileName,false,0);
+
+  SetWRect(10,80,370,270);
+  v = 6; vs = 20; h = 150;
+  //StaticText(h-5,v+7,"Название исходящего",true);
+  //StaticText(h-5,v+18,"файла для сохранения",true);
+  //EditField(h,v,-40,"",Normal,FileName,false,0);
+
+  //EditField(h,v+=vs,-40,"Путь для сохранения",Normal,DirName,false,0);
+  //EditField(h,v+=vs,-40,"Склад",Normal,Location,false,LocationSClass);
+  //EditField(h,v+=vs,100,"Прейскурант",Normal,PLCode,false,PLDefSClass);
+  //EditField(h,v+=vs,50,"Указывать количество",Normal,Qty,true,0); //Edit***************************Sasha2,11:43 14.01.2015
+  /*StaticText(h,v+=vs*3,"Насройки Magmi (SSH)",true);
+  EditField(h,v+=10,100,"IP адрес FTP-сервера",Normal,HostIP,false,0);
+  EditField(h,v+=vs,50,"Порт FTP-сервера",Normal,Port,false,0);
+  EditField(h,v+=vs,100,"Логин",Normal,Login,false,0);
+  EditField(h,v+=vs,100,"Пароль",Normal,Password,false,0);*/
+  
+	StaticText(h,v+=vs*3,"Настройки Magento",true);
+  EditField(h,v+=10,100,"IP адрес WEB-магазина",Normal,OrdersHostIP,false,0);
+  //EditField(h,v+=vs,50,"Порт FTP-сервера",Normal,OrdersPort,false,0);
+	
+	
+  EndWindow;
+end;
+
+
+window CULClass:10
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  WindowBegin("Контакты",CULClass,CGmlist,-);
+  SpawnClass(CUDClass);
+  if (HasJewelleryInterface) then begin
+    SetWRect(20,80,900,300);
+  end else begin
+  SetWRect(20,80,900,300);
+  end;
+  Sizeable(-1,-1,0,0);
+  UseView(CUVc);
+//  FormName(CustRn);  // Crash in multiuser
+//  h = 20; HalPushButton(h,v=3,h=h+100,v+vs,"VEList","Поставщики");
+//  HalPushButton(h=h+50,v=3,h=h+100,v+vs,"CUList","Клиенты");
+  RecordList(4,17,-21,-39);
+  RlColKey(4,4,"Код",Code,false,Code);
+  //RlColKey(96,96,"Сокр.",SearchKey,false,SearchKey);
+  RlColKey(100,100,"Наименование",Name,false,Name);
+  RlCol(290,290,"Вал.",CurncyCode,false);
+  RlCol(330,330,"Прайс",PLCode,false);
+  RlColKey(370,370,"Катег.",CustCat,false,Group);
+  if (HasJewelleryInterface) then begin
+    RlColKey(-480,-480,"Телефон",Phone,false,Phone);
+    RlColKey(-380,-380,"Мобильный",Mobile,false,Mobile);   
+    RlCol(-280,-280,"Электронная почта",eMail,true);  
+    RlCol(-150,-150,"Адрес 1",InvAddr0,false);
+  end else begin
+  
+
+  RlColKey(-420,-420,"Телефон",Phone,false,Phone);
+  RlColKey(-325,-325,"Контакт",Person,false,Person);
+  RlColKey(-215,-215,"Отдел",Department,false,Department);
+  if (CUVATNrColumn) then begin
+    RlColKey(-125,-125,"ИНН",VATNr,false,VATNr);
+  end else begin
+    RlColKey(-125,-125,"ОКПО",RegNr1,false,RegNr1);
+  end;
+  RlColKey(-50,-50,"Р/с",BankAccount,false,BankAccount);
+  end;
+  SearchField("Поиск");
+  if (HasMetroTestFeatures or GUIType!=kGUIMetro) then begin
+    CommunicateButton;
+  end;
+  if (HasLimitedAccess) then begin
+    BrowseSubsetButton(-40,-15);
+  end;
+  if (UserCanReport("CustPSRn","",true)) then begin
+  SpecialMenu("Справка по клиенту",'e',0,"CUStatusCULsm");
+  end;
+  if (UserCanReport("VEPSRn","VendPSRClass",true)) then begin
+  SpecialMenu("Статус поставщика",'u',2,"VEStatusLsm");
+  end;
+  SpecialMenu("Сменить пароль",' ',1,"ChangePasswdCULsm");
+  SpecialMenu("Найти",'F',3,"CUSearchLsm");
+  if (GuiType==kGuiCocoa) then begin
+    SpecialMenu("Импортировать адресную книгу",' ',5,"ImportAddressbooksm");
+  end;
+  SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);         
+  SpecialMenu("Создать Деятельность",'c',4,"NewActCULsm");         
+  EndWindow;
+end;
+
+window PriceRClass:3
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,v,vm,vs;
+  WindowBegin("Определите прейскурант",PriceRClass,CGRcW,RcType);
+  SetWRect(20,80,420,350);
+  v = 6; vs = 20; h = 120;
+  EditFieldTL(h,v, 150,"Товар",   M4UStr,Normal,50,f1,false,INSClass);
+  EditFieldTL(h,v+=vs, 150,"Группа",   M4UStr,Normal,100,f3,false,ITSClass);
+	EditFieldTL(h,v+=vs, 150,"Классификация",   M4UStr,Normal,11,ObjStr,false,DISClass);
+	//EditFieldTL(h,v+=vs, 150,"Отдел",   M4UStr,Normal,11,f4,false,DepSClass);
+  EditFieldTL(h,v+=vs, 150,"Клиент",   M4UStr,Normal,20,f5,false,CUSClass); 
+	EditFieldTL(h,v+=vs, 150,"Прейскурант",   M4UStr,Normal,50,f2,false,PLDefSClass);
+	EditFieldTL(h,v+=vs, 70,"Склад",   M4UStr,Normal,50,f6,false,LocationSClass);// Edit ************************** Tuesday, 21 March 2017 10:15:11
+	EditFieldTL(h,v+=vs, 70,"Язык",   M4UStr,Normal,5,Stext,false,LangSClass);
+  vm = v+=41;
+  if (IsEnterprise) then begin
+    ButtonFrame(h+=80,v=vm,123,2,"Функция");
+    RadioButton(h,v,0,0,"Внешний",flags[3]);
+    RadioButton(h,v+=16,1,0,"Внутренний",flags[3]);
+//    ButtonFrame(h+=150,v=vm,123,3,"Сортировка");
+    h = 50;
+  end else begin
+  end;
+  ButtonFrame(h,v=vm,123,4,"Сортировать по");
+  RadioButton(h,v,0,0,"Коду товара",flags[2]);
+  RadioButton(h,v+=16,1,0,"Группе",flags[2]);
+  RadioButton(h,v+=16,2,0,"Наименованию",flags[2]);
+  RadioButton(h,v+=16,3,0,"Группе/Наименованию",flags[2]);
+  EndFrame;
+  v = v + 24;
+  if (IsEnterprise) then begin
+    h = 50;
+  end;
+  CheckBox(h,vm=v, 70,"Цены вкл. НДС",flags[8]);
+  CheckBox(h,v+=16, 70,"Цены без НДС",flags[9]);
+  CheckBox(h,v+=16, 70,"Только товары с остатком",flags[4]);
+  CheckBox(h,v+=16, 70,"Только товары из этого прейскуранта",flags[5]);
+  CheckBox(h,v+=16, 70,"Умножить на курс (валюта прейскуранта)",flags[6]);
+  CheckBox(h,v+=16, 70,"Показывать количество штук",flags[11]);// Edit ************************** BPI Ukraine - KramarAlexandr - Monday, 27 November 2017 16:15:20
+  v = vm;
+	CheckBox(h2=200,v,0,"Пок-ть варианты",flags[7]);
+	v = v + 16;
+  if (IsEnterprise) then begin
+  CheckBox(h2,v,0,"Вкл. скидки по кол-ву товара",flags[10]); 
+  end;
+  EndWindow;
+end;
+
+
+window MyCuPer2RClass:1// Edit ************************** Thursday, 23 March 2017 14:40:12
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,v,v1,vm;
+  WindowBegin("Определите ведомость расчетов с клиентами",MyCuPer2RClass,CGRcW,RcType);
+  SetWRect(20,80,450,430);
+  h = 120;
+  PeriodField(h,v=6,"Период");
+  EditFieldTL(h,v+=20, 150,"Клиент",   M4UStr,Normal,30,f1,false,CUSClass);
+  //if (HasCategories) then begin
+    EditFieldTL(h,v+=20,50, "Категория",   M4UStr,Normal,5,f3,false,CCatSClass);
+  //end;// Edit ************************** Thursday, 23 March 2017 14:41:24
+  //if (HasContactClassification) then begin
+    EditFieldTL(h,v+=20,150, "Классификация",   M4UStr,Normal,30,f4,false,CClassSClass);
+  //end;// Edit ************************** Thursday, 23 March 2017 14:41:31
+  //if (HasMultiCurrency) then begin// Edit ************************** Thursday, 23 March 2017 14:41:34
+    EditFieldTL(h,v+=20,50, "Валюта",M4Code,Normal,5,CurncyCode,false,CurncyCodeSClass);
+  //end;
+  //if (HasMainPartner) then begin// Edit ************************** Thursday, 23 March 2017 14:41:43
+    EditFieldTL(h,v+=20,80, "Основной партнер",   M4UStr,Normal,20,LastAcc,false,CUSClass);
+  //end;
+  //if (IsEnterprise or HasLocalization("PRT")) then begin// Edit ************************** Thursday, 23 March 2017 14:41:54
+    EditFieldTL(h,v+=20 ,80,"Счёт дебиторов",M4UStr,Normal,10,FirstAcc,false,AccSClass);
+  //end;
+  //if (IsEnterprise) then begin// Edit ************************** Thursday, 23 March 2017 14:42:08
+    StaticText(h+85,v+14,"Игнор-ать в нач. и подр. сальдо",false);
+  //end;
+  h = 30;
+  //if (HasMultiCurrency) then begin// Edit ************************** Thursday, 23 March 2017 14:42:02
+    CheckBox(h,vm=(v+=25),0,"Суммы в валюте",flags[2]);
+  //end;
+  /*if (HasOfficialSerNr or HasInvoiceOfficialSerNr) then begin
+    if (HasLocalization("PRT")) then begin  v = v + 8; end;// Edit ************************** Thursday, 23 March 2017 14:41:07
+    CheckBox(h,v+=16,0,"Показать офиц. №",flags[15]);
+  end;*/
+  if (IsEnterprise) then begin
+    CheckBox(h,v+=16,0,"Показывать сч/ф нач.сальдо",flags[10]);
+    CheckBox(h,v+=16,0,"Новая страница для каждого контакта",flags[6]);  
+    v1 = v;
+
+    CheckBox(h2=220,v=vm,0,"Показать записи счетов/ф",flags[9]);  
+    CheckBox(h2,v+=16,0,"Сумма платежей",flags[8]);  
+    CheckBox(h2,v+=16,0,"Негативное значение кредитных сч/ф",flags[7]);  
+    ButtonFrame(h,vm=(v=(v1+40)),123,2,"Функция");  
+  end else begin
+    ButtonFrame(h,vm=(v+=40),123,2,"Функция");
+  end;
+  RadioButton(h,v,0,0,"Сводный",ArtMode);
+  RadioButton(h,v+=16,1,0,"Подробно",ArtMode);
+
+  if (IsEnterprise) then begin
+    ButtonFrame(h,v+=40,200,3,"Клиенты");
+    RadioButton(h,v,0,0,"Все",flags[1]);
+    RadioButton(h,v+=16,1,0,"с операциями или нач. сальдо",flags[1]);
+    RadioButton(h,v+=16,2,0,"с сальдо (только в сводном)",flags[1]);
+
+    ButtonFrame(h2=220,v=vm,123,2,"Сорт.(в подробн.)");
+    RadioButton(h2,v,0,0,"дате операции",flags[5]);
+    RadioButton(h2,v+=16,1,0,"дате оплаты",flags[5]);
+  end else begin
+    CheckBox(h,v+=24,0,"Только клиенты с сальдо",flags[1]);
+  end;
+
+  //CheckBox(h,v=v-130,0,"Include received Receipts",flags[4]);
+  EndWindow;
+end;
+
+window ORLClass:3
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  Integer pos,rn;
+
+  WindowBegin("Счета клиентам",ORLClass,CGmlist,-);
+  SpawnClass(ORDClass);
+  SetWRect(20,80,1100,298);
+  Sizeable(-1,-1,0,0);
+  UseView(ORVc);
+  FormName(PrintORL);
+  RecordList(4,17,-21,-39);
+  RlColKey(4,4,"№",SerNr,false,SerNr);
+  RlColKey(79,79,"ОК",OKFlag,false,OKFlag);
+  pos = 111;
+  if (HasModIN) then begin
+    RlColKey(pos,pos,"отгруж",ShipMark,false,ShipFlag);
+    pos = pos + 32;
+  end;
+  if (HasModSL) then begin
+    RlColKey(pos,pos,"Отфакт",InvMark,false,InvFlag);
+    pos = pos + 32;
+  end;
+  RlCol(pos,pos,"закр",Closed,false);
+  pos = pos + 32;
+  RlColKey(pos,pos,"Дата заказа",OrdDate,false,OrdDate);
+  pos = pos + 80;
+  if (HasMultiLocations) then begin
+    RlCol   (pos,pos,"Местоположение",Location,false);
+    pos = pos + 60;
+  end;
+  RlColKey(pos,pos,"Номер заказа клиента",CustOrdNr,false,CustOrdNr);
+  pos = pos + 80;
+  RlColKey(pos,pos,"Клиент",CustCode,false,CustCode);
+  pos = pos + 60;
+  RlColKey(pos,pos,"Наим.",Addr0,false,Name);
+  if (IsEnterprise) then begin
+    if (AcceptanceStatusColumnTest("ORVc")) then begin 
+      CalculatedColumn(-240,-240,"Подтв.","ORLClassAcceptanceStatus",false);
+    end;
+    RlColKey(-340,-340,"Класс",OrderClass,false,OrderClass);
+    RlColKey(-300,-300,"Итого",Sum4,true,Sum4);
+    //RlCol(-75,-75,"Аванс",DownPaySent,true);// Edit ************************** Wednesday, 11 October 2017 09:44:28
+    RlCol(-240,-240,"Коммен.",Comment,false);
+  end else begin
+    RlColKey(-55,-55,"ИТОГО",Sum4,true,Sum4);
+  end;
+  if (HasLimitedAccess) then begin
+    BrowseSubsetButton(-40,-15);
+  end;
+  SearchField("Поиск");
+  if (GuiType==kGuiMetro) then begin
+    rn = 0;
+    RowMenuBegin("");
+    if (HasModIN) then begin
+      RowMenuItem(rn,"Создать отгрузку",'L','L',4300,"SHFromORLsm"); rn = rn + 1;  
+    end;
+    RowMenuItem(rn,"Создать счет-фактуры",'L','L',4300,"IVFromORLsm"); rn = rn + 1;  
+    if (HasDownpayments) then begin
+      RowMenuItem(rn,"Созжать счет-фактуру на аванс",'o','o',4300,"DownPayFromORLsm"); rn = rn + 1;  
+    end;
+    RowMenuItem(rn,"Статус счет",'r','r',4300,"ORStatusORLsm"); rn = rn + 1;  
+    if (HasModPO) then begin
+      RowMenuItem(rn,"Создать заказ поставщику",' ',' ',4300,"POFromORLsm"); rn = rn + 1;  
+    end;
+    if (HasModCRM) then begin
+      RowMenuItem(rn,"Создать деятельность",'c','c',4300,"ActFromORLsm"); rn = rn + 1;
+    end;
+    if (IsEnterprise) then begin
+      RowMenuItem(rn,"Отметить счет как сфактурированный",' ',' ',4300,"ORToInvORLsm"); rn = rn + 1;  
+    end;
+    EndRowMenu;
+  end else begin
+    SpecialMenu("Статус заказа",'r',3,"ORStatusORLsm");         
+    if (IsEnterprise) then begin
+      SpecialMenu("По заказу выставлен счёт",' ',6,"ORToInvORLsm");         
+    end;
+    SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);         
+    if (HasModIN) then begin
+      SpecialMenu("Создать отгрузку",'L',0,"SHFromORLsm");
+    end;
+    SpecialMenu("Создать реализацию",'F',1,"IVFromORLsm");
+    if (HasDownpayments) then begin
+      SpecialMenu("Создать счет-фактуру на аванс",'o',2,"DownPayFromORLsm");
+    end;
+    if (HasModPO) then begin
+      SpecialMenu("Создать заказ поставщику",' ',4,"POFromORLsm");
+    end;
+    if (HasModCRM) then begin
+      SpecialMenu("Создать деятельность",'c',5,"ActFromORLsm");
+    end;
+  end;
+  EndWindow;
+end;
+
+
+window IPDClass:2
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,h3,h4,t,v,vm,vs,fl,v2;
+  record CYBlock CYb;
+  Integer f,flipnr;
+
+  BlockLoad(CYb);
+  WindowBegin("Платеж клиента",IPDClass,CGview,-);
+  SetWRect(20,80,700,380);
+  Sizeable(-1,-1,0,0);
+  UseView(IPVc);
+  ActiveFieldOnNew("TransDate");
+  h = 100; h2 = 262; h3 = 470;v = 6; vs = 20;
+  if (HasNumberSeries) then begin
+    EditField(h,v, 80,"Сер. номер",St_i,SerNr,false,TSerSClass);
+  end else begin
+    EditField(h,v,80,"Номер",St_i,SerNr,false,0);
+  end;
+  EditField(h2,v,82,"Дата опер.",Normal,TransDate,false,PasteCurDate);
+  EnterSkip(PayMode);
+  if (IsEnterprise) then begin
+    EditField(h3,v,-40,"Ссылка",Normal,RecNumber,false,0);
+  end else begin
+    CheckBox(h4=-100,v,0,"OK",OKFlag);
+  end;
+  EditField(h,v+=20,30,"Способ оплаты",Normal,PayMode,false,PMSClass);
+  EnterSkip(Math);
+  EditField(h2,v,-40,"Комментарий",Normal,Comment,false,0);
+  if (IsEnterprise) then begin
+    EditField(h,v+=20,80,"Код авториз.",ViewOnly,AuthorizationCode,false,0);
+    CheckBox(-300,v,0,"Инф-ция о клиенте в записи",ARonTR);
+    CheckBox(h4=-100,v,0,"OK",OKFlag);
+  end else begin
+    if (IsBooks and IsStandardProduct==false) then begin
+      EditField(h2,v+=vs,-40,"Ссылка",Normal,RecNumber,false,0);  
+    end;
+  end;
+  if (HasLocalization("ARG,PRT")) then begin  
+    v = v + vs;
+    if (HasOfficialSerNr) then begin
+      EditField(h,v,135,"Офиц. №",Normal,OfficialSerNr,false,LegalInvNrSClass);  
+      v2 = 20; 
+    end;
+  end;
+  if (HasLocalization("PRT")) then begin  
+      if (HasNumberSeries) then begin
+        EditField(h2+104,v,100,"Official Ser No. 2",Normal,OfficialSerNr2,false,0);  
+        EditField(h3+90,v,135,"Статус",Normal,Status,false,SetSClass);  v = v + vs;  
+    end;
+  end;
+  EnterSkip(Math);
+  if (HasMultiCurrency) then begin
+    fl = 40;
+//    if (GuiType==kGuiiPhone) then begin fl = 70; end;
+    EditField(-267,-21,fl,"Валюта",Normal,PayCurCode,false,CurncyCodeSClass);
+  end;
+  EditField(-142,-21,-40,"Получено",Normal,CurPayVal,true,0);
+  h=4; v=91+v2;
+  if (HasMultiCurrency or (HasLocalization("RUS") and HasModSL)) then begin         
+    MatrixBegin(h,v,-50,-24,-,299);
+  end else begin
+    MatrixBegin(h,v,-30,-24,-,99);
+  end;
+  vm = v;
+  MatTypedRow(stp);
+  MatOverStrike(ovst);
+  Flip(0);
+  if (HasPreferedOfficialSerNr) then begin
+    if (HasLocalization("POL,RUS")) then begin
+      MatCol(t=kReceiptRowTypeNormal,30,"№ сч/ф",0,InvoiceOfficialSerNr,false,ARSClass);
+    end else begin
+      MatCol(t=kReceiptRowTypeNormal,30,"№ сч/ф",0,InvoiceNr,false,ARSClass);
+    end;
+  end else begin
+    MatCol(t=kReceiptRowTypeNormal,30,"№ сч/ф",0,InvoiceNr,false,ARSClass);
+  end;
+  EnterSkip(RecVal);
+  MatCol(t,125,"Клиент",0,CustCode,false,CUSClass);
+  if (HasPreferedOfficialSerNr) then begin
+    MatCol(t=kReceiptRowTypeSettlementDiscount,30,"",0,InvoiceOfficialSerNr,false,ARSClass);
+  end else begin
+    MatCol(t=kReceiptRowTypeSettlementDiscount,30,"",0,InvoiceNr,false,ARSClass);
+  end;
+  MatText(t,125,"Скидка",false);
+  if (HasObjects) then begin
+    MatCol(t,190,"Объект",0,Objects,false,ObjSClass);
+  end;
+  MatCol(t,-390,"Вал.сч/ф",0,InvCurncy,true,0);
+  MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+  MatCol(t,-260,"Вал. банка",0,BankCurncy,true,CurncyCodeSClass);
+  MatCol(t,-220,"На р/с",0,BankVal,true,0);
+  MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+  MatCol(t,-90,"Получено",0,RecVal,true,0);
+  if (HasPreferedOfficialSerNr) then begin
+    EnterSkip(InvoiceOfficialSerNr);
+    MatCol(t=kReceiptRowTypeWriteoff,30,"",0,InvoiceOfficialSerNr,false,ARSClass);
+  end else begin
+    EnterSkip(InvoiceNr);
+    MatCol(t=kReceiptRowTypeWriteoff,30,"",0,InvoiceNr,false,ARSClass);
+  end;
+  MatText(t,125,"Списание",false);
+  MatCol(t,-460,"",0,WriteOffAcc,false,AccSClass);
+  MatCol(t=kReceiptRowTypeBankFee,30,"",0,InvoiceNr,false,ARSClass);
+  MatText(t,105,"Ком.банка",false);
+  MatCol(t,-390,"Вал.сч/ф",0,InvCurncy,true,0);
+  MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+  MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+  MatCol(t,-220,"Сумма банка",0,BankVal,true,0);
+  MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+  MatCol(t,-90,"Получено",0,RecVal,true,0);
+  flipnr = 1;
+  Flip(flipnr); flipnr = flipnr + 1;
+  EnterSkip(PayDate);
+  MatCol(t=kReceiptRowTypeNormal,200,"Текст",0,CustName,false,0);
+  if (IsEnterprise) then begin
+    MatCol(t,-350,"Дата оплаты",0,PayDate,false,0);
+  end;
+  if (HasObjects and IsEnterprise==false) then begin
+    MatCol(t,190,"Объект",0,Objects,false,ObjSClass);
+  end;
+  EnterSkip(RecVal);
+  if (HasMultiCurrency) then begin
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал.",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+  end else begin
+    MatCol(t,-270,"Сумма сч.",0,InvOutstand,false,0);
+    MatCol(t,-180,"Сумма к зачисл.",0,InvVal,true,0);
+    MatCol(t,-90,"Получ. сумма",0,RecVal,true,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-270,"Сумма сч.",0,InvOutstand,false,0);
+    MatCol(t,-180,"Сумма к зачисл.",0,InvVal,true,0);
+    MatCol(t,-90,"Получ. сумма",0,RecVal,true,0);
+  end;
+  if (HasMultiCurrency) then begin
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=kReceiptRowTypeNormal,190,"Текст",0,CustName,false,0);
+    MatCol(t,-350,"Вал.",0,InvCurncy,true,0);
+    MatCol(t,-310,"Сумма отк. сч.",0,InvOutstand,true,0);  
+    MatCol(t,-220,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал.",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    if (HasLocalization("POL")) then begin
+      Flip(flipnr); flipnr = flipnr + 1;
+      MatCol(t=kReceiptRowTypeNormal,190,"Текст",0,CustName,false,0);
+      MatCol(t,-310,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+      MatCol(t,-270,"На р/с",0,BankVal,true,0);
+      MatCol(t,-200,"К осн. в.1",0,ToRateB1BankVal,true,0);  
+      MatCol(t,-160,"Сум.осн. в вал.1",0,B1BankVal,true,0);  
+    end;
+  end;
+  if (IsEnterprise) then begin
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=kReceiptRowTypeNormal,190,"Текст",0,CustName,false,0);
+    MatCol(t,-270,"Сп.опл.",0,PayMode,false,PMSClass);
+    if (StandardHansa==false) then begin
+      MatCol(t,-220,"№ чека",0,ChequeNr,false,0);
+    end;
+    MatCol(t,-130," Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал. ",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=kReceiptRowTypeNormal,190,"Текст",0,CustName,false,0);
+    MatCol(t,-320,"№ счета",0,OrderNr,false,ORSClass);
+    MatCol(t,-230,"№ предоп.",0,CUPNr,false,ARPaySClass);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал.",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=kReceiptRowTypeNormal,190,"Текст",0,CustName,false,0);
+    if (CYb.UseTaxTemplatesforTaxCalc!=0) then begin
+      MatCol(1,-310,"Налог",0,TaxTemplateCode,false,TaxTemplateSClass);
+    end else begin
+      MatCol(1,-310,"НДС",0,VATCode,false,VATCodeSClass);
+    end;
+    MatCol(t,-270,"Сумма НДС",0,VATVal,false,0);
+    MatCol(t,-200,"Экстра НДС",0,TAX1Sum,false,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал. ",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=kReceiptRowTypeNormal,190,"Текст",0,CustName,false,0);  
+    MatCol(t,-260,"Объекты",0,Objects,false,ObjSClass);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал.",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=kReceiptRowTypeNormal,190,"Счёт округл.",0,RoundOffAcc,false,AccSClass);
+    MatCol(t,-360,"Округление",0,RoundOff,true,0);
+    if (StandardHansa==false) then begin
+      MatCol(t,-300,"Взнос",0,InstNr,false,ARInstallSClass);
+    end;
+    MatCol(t,-170,"Ссылка",0,rkRecNumber,false,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал.",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=kReceiptRowTypeNormal,190,"Дебиторы",0,ARAcc,false,AccSClass);
+    if (StandardHansa==false) then begin
+      MatCol(t,-320,"№ кред.договор.",0,CredManNr,false,CredManSClass);
+    end;
+    MatCol(t,-220,"Комментарий",0,Comment,false,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал.",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=kReceiptRowTypeNormal,200,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-410,"На р/с",0,BankVal,true,0);
+  //  MatCol(t,-340,"Bank Fee",0,BankFeeVal,true,0);
+    MatCol(t,-280,"К осн. в.1",0,ToRateB1BankVal,true,0);
+    MatCol(t,-210,"Сум.осн. в вал.1",0,B1BankVal,true,0);
+    MatCol(t,-105,"Сум.осн. в вал.2",0,B2BankVal,true,0);
+  //  MatCol(t,-200,"Fee %",0,BankFeePrc,true,0); /* What was this ?? */
+  //  MatCol(t,-70,"Coef. Value",0,Coef,true,0);
+    MatCol(t=kReceiptRowTypeWriteoff,-390,"Вал.",0,InvCurncy,true,0);
+    MatCol(t,-350,"Сумма сч/ф",0,InvVal,true,0);
+    MatCol(t,-260,"Вал.",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-220,"На р/с",0,BankVal,true,0);
+    MatCol(t,-130,"Вал.",0,RecCurncy,true,CurncyCodeSClass);
+    MatCol(t,-90,"Получено",0,RecVal,true,0);
+    Flip(flipnr); flipnr = flipnr + 1;
+    MatCol(t=1,-470,"Вал. банка",0,BankCurncy,true,CurncyCodeSClass);
+    MatCol(t,-430,"На р/с",0,BankVal,true,0);
+    MatCol(t,-350,"Курс",0,FrRateBankVal,true,0);
+    MatCol(t,-310,"Сум.осн. в вал.1",0,ToRateB1BankVal,true,0);
+    MatCol(t,-240,"К осн. в.2",0,ToRateB2BankVal,true,0);
+    MatCol(t,-170,"Осн.вал. 1",0,BaseRate1BankVal,true,0);
+    MatCol(t,-90,"Осн.вал. 2",0,BaseRate2BankVal,true,0);
+//    MatCol(t,-10,"Received Value",0,RecVal,true,0);
+  end else begin
+    if (HasRussianPrepayment) then begin
+      Flip(flipnr); flipnr = flipnr + 1;
+      MatCol(t=kReceiptRowTypeNormal,190,"Текст",0,CustName,false,0);
+      MatCol(1,-265,"НДС",0,VATCode,false,VATCodeSClass);
+      MatCol(t,-230,"Знач.НДС",0,VATVal,false,0);
+      MatCol(t,-170,"Счёт №",0,OrderNr,false,ORSClass);
+      MatCol(t,-85,"Предоплата",0,CUPNr,false,ARPaySClass);
+    end else begin
+      if (IsBooks and IsStandardProduct==false) then begin
+        Flip(flipnr); flipnr = flipnr + 1;
+        MatCol(t=kReceiptRowTypeNormal,-265,"НДС",0,VATCode,false,VATCodeSClass);  
+        MatCol(t,-230,"Знач.НДС",0,VATVal,false,0);  
+        MatCol(t,-170,"Дата опл.",0,PayDate,false,0);  
+        MatCol(t,1,"Ссылка",0,rkRecNumber,false,0);  
+      end else begin
+        if (HasPrepayments) then begin
+          Flip(flipnr); flipnr = flipnr + 1;
+          MatCol(t=kReceiptRowTypeNormal,200,"№ предварительного платежа",0,CUPNr,false,ARPaySClass);           
+          if (HasLocalization("LVA")) then begin
+            MatCol(t,-265,"Код НДС",0,VATCode,false,VATCodeSClass);  
+            MatCol(t,-230,"Знач.НД",0,VATVal,false,0);  
+          end;
+          if (HasModSO) then begin
+            MatCol(t,-170,"№ счёта",0,OrderNr,false,ORSClass); 
+          end;  
+          MatCol(t,-130,"Валюта",0,RecCurncy,true,CurncyCodeSClass);         
+          MatCol(t,-90,"Получено",0,RecVal,true,0);         
+        end;
+      end;
+    end;
+  end;
+  InsertRowTest;
+  DeleteRowTest;
+  RowMenuBegin("");         
+  if (HasAddFee) then begin
+    RowMenuItem(0,"Добавить стоимость",' ',' ',0,"NewFeeIPDsm");         
+  end;
+  if (HasSettlementDiscount) then begin
+    RowMenuItem(0,"Добавить скидку по платежу",' ',' ',0,"CashDiscountIPDsm");         
+  end;
+  RowMenuItem(0,"Добавить списание",' ',' ',0,"NewWriteoffIPDsm");         
+  if (IsEnterprise) then begin
+    if (StandardHansa==false) then begin
+      RowMenuItem(0,"Распределение чеков",' ',' ',0,"DistributeChequesIPDsm");         
+    end;
+    if (IsEnterprise or (IsBooks and IsStandardProduct==false) or IsStandardUnused) then begin
+      RowMenuItem(0,"Распределение платежа",' ',' ',0,"IPExpandIPDsm");         
+    end;
+    if (IsEnterprise) then begin
+      RowMenuItem(0,"Вычисление значения",'=','=',0,"CalculateFieldIPDsm");         
+      RowMenuItem(0,"Списать предварительный платёж",' ',' ',0,"WriteofPrepayIPDsm");         
+    end;
+  end;
+  EndRowMenu;
+  EndMatrix;
+  vs = 22;
+  v = v + 1;
+  if (flipnr>2) then begin
+    for (f=1;f<flipnr;f=f+1) begin
+      VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1));
+      v = v + vs;
+    end;
+  end;
+  vs = 20;
+
+  if (GuiType==kGuiMetro) then begin // Temporarily disabled on Windows 8
+    if (HasAddFee) then begin
+    SpecialMenu("Добавить комиссию банка",' ',2,"NewFeeIPDsm");
+    end;
+    SpecialMenu("Проверить сумму платежа",' ',6,"IPInfoIPDsm");
+    if (HasModNL) then begin
+      SpecialMenu("Открыть запись операции",'t',9,"OpenTRFromIP");
+    end;
+    SpecialMenu("Создать счет-фактуру на аванс",' ',7,"DownPayFromIPDsm");
+  end else begin
+    if (IsEnterprise or (IsBooks and IsStandardProduct==false)) then begin
+      SpecialMenu("Проверить сумму платежа",' ',6,"IPInfoIPDsm");
+    end;
+    if (HasModNL) then begin
+      SpecialMenu("Открыть запись операции",'t',9,"OpenTRFromIP");
+    end;
+    if (HasTaxMatrix) then begin
+        SpecialMenu("Открыть налоговую матрицу",' ',25,"OpenVatMatrixIPDsm");
+    end;
+    if (IsEnterprise) then begin
+      if (StandardHansa==false) then begin
+        SpecialMenu("Платёж кредитной картой",' ',15,"CCPayIPDsm");         
+      end;
+      SpecialMenu("Выписка из банка",' ',16,"BankStIPDsm");         
+      SpecialMenu("Печать кассового ордера",' ',8,"PrintCashInOutIPDsm");         
+    end;
+    if (HasLocalization("PRT")) then begin
+      SpecialMenu("Перепечатать чек",' ',8,"ReprintIPDsm"); 
+    end;
+    
+    SpecialMenu("Отправить ведомость по почте",' ',8,"SendCuPerMailDsm"); 
+    
+    SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);
+    if (HasModCRM or HasStandardCRM) then begin
+//      SpecialMenu("Activity",'c',14,"ActFromIPDsm");
+    end;
+    if (IsEnterprise) then begin
+      SpecialMenu("Создать приходный ордер",' ',11,"CLInFromIPDsm");
+      if (StandardHansa==false) then begin
+        SpecialMenu("Создать чек",'e',9,"CreateCheckIPDsm");
+        if (HasLocalization("HRV,SRB,SLV,UKR")) then begin         
+          SpecialMenu("Создать коррекцию #VAT# #S/L#",' ',17,"VATCorrectionIPDsm");         
+        end;
+      end;
+      SpecialMenu("Создать счет-фактуру на аванс",' ',7,"DownPayFromIPDsm");
+    end else begin
+      if (HasLocalization("HRV,SRB,SLV,UKR")) then begin         
+        SpecialMenu("Создать коррекцию #VAT# #S/L#",' ',17,"VATCorrectionIPDsm");         
+      end;
+    end;
+    if (HaseMail) then begin
+      SpecialMenu("Создать эл. письмо",'m',18,"CreateMailFromIPDsm");
+    end;
+    if (HasRussianPrepayment) then begin
+      SpecialMenu("Создать сч/ф на предоплату",' ',10,"IVFromPrepIPDsm");
+    end;
+  end;
+  EndWindow;
+end;
+
+
+window ProdDClass:1
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  real h,h2,h3,h4,v,vm,vs;
+  Integer rn,flipnr,f;
+  
+  WindowBegin("Производство",ProdDClass,CGview,-);
+  SetWRect(20,80,620,333);
+  Sizeable(-1,-1,0,0);
+  UseView(ProdVc);
+  FormName(ProdOrderForm);
+  ActiveFieldOnNew("Recepy");
+  Tile(0,175,false,"",SerNr);
+  vs = 20; h = 70; h2 = 390; v = 10; h3 = 500; h4 = 220;
+  EditField(h,v,80,"Номер",St_i,SerNr,false,TSerSClass);
+  EditField(h4,v,250,"Наим.",Normal,RecName,false,0);
+  EditField(h,v+=vs,80,"Структ.",Normal,Recepy,false,RecSClass);
+  EditField(h4,v,80,"Дата нач.",Normal,StartDate,false,PasteCurDate);
+  EditField(h2,v,80,"Дата оконч.",Normal,ProdDate,false,PasteCurDate);
+  EditField(h,vm=(v+=vs),80,"К-во",Normal,Qty,true,0);
+  if (IsEnterprise) then begin
+  EditField(h4,v,80,"Время нач.",Normal,StartTime,false,PasteCurTime);
+  EditField(h2,v,80,"Время оконч.",Normal,EndTime,false,PasteCurTime);
+  end;
+  if (HasMultiLocations) then begin
+  EditField(h,v+=vs,80,"Склад",Normal,Location,false,LocationSClass);
+  end;
+  if (IsEnterprise) then begin
+    EditField(h4,v,80,"Класс",Normal,ProdClass,false,ProdClassSClass);
+    EditField(h2,v,80,"Машина",Normal,FixAssCode,false,AT2UnitSClass);
+  end;
+  if (IsEnterprise) then begin
+  EditField(h,v+=vs,80,"Провер.",Normal,Inspector,false,UserSClass);
+  end;
+  if (HasPersons) then begin
+  EditField(h2,v,80,"Сотр.",Normal,Person,false,UserSClass);
+  end;
+//  EditField(h2,v,80,"In Item Scale",Normal,Scale,false,0);
+  if (IsEnterprise) then begin
+    EditField(h,v+=vs,80,"Зак.на пр.",ViewOnly,ProdOrder,false,0);
+    EditField(h2,v,80,"Причина отмены",Normal,StandProblem,false,StandProblemsSClass);
+  end else begin
+    EditField(h2,v+=vs,80,"Причина отмены",Normal,StandProblem,false,StandProblemsSClass);   // From dict
+  end;
+  if (IsEnterprise) then begin
+    EditField(h,v+=vs,80,"Действ. кол.",ViewOnly,ActualQty,true,0);
+    EditField(h2,v,80,"Маршрут",Normal,Routing,false,RoutingSClass);
+  end;
+//  ButtonFrame(h3,v+=36,80,3,"Inspection");
+//  RadioButton(h3,v,0,0,"Not done",InspectStatus);
+//  RadioButton(h3,v+=16,1,0,"OK",InspectStatus);
+//  RadioButton(h3,v+=16,2,0,"Faulty",InspectStatus);
+  TileButton(1,"Товары");
+  TileButton(2,"Комментарий");
+//  CheckBox(370,v,0,"Reserved",Reserved);
+  ButtonFrame(h3,v=20,150,5,"Статус");
+  RadioButton(h3,v,0,0,"Создано",PRStatusFlag);
+  RadioButton(h3,v+=16,4,0,"Отменено",PRStatusFlag);
+  RadioButton(h3,v+=16,2,0,"Начато",PRStatusFlag);
+  RadioButton(h3,v+=16,3,0,"Завершено",PRStatusFlag);
+  RadioButton(h3,v+=16,5,0,"Завершено, но не принято",PRStatusFlag);
+  Tile(1,120,true,"1",Math);
+  v=20;
+  MatrixBegin(4,v,-50,-30,-,300);
+  Flip(0);
+  MatCol(1,34,"Товар",0,Item,false,INSClass);
+  MatCol(1,110,"Коммент.",0,Comment,false,0);
+  flipnr = 1;
+  Flip(flipnr); flipnr = flipnr + 1;
+  if (HasSerialNumbers) then begin
+  MatCol(1,-375,"Серийный №",0,SerialNr,false,SerialNrSClass); 
+  end;
+  MatCol(1,-310,"Затр.",0,InQty,true,MATVARINSClass);
+  MatCol(1,-260,"Выпуск",0,OutQty,true,MATVARINSClass);
+  if (IsEnterprise) then begin 
+  MatCol(1,-210,"% ст-ти",0,RelVal,true,0);
+  end;
+  MatCol(1,-160," Ст-ть",0,ItemCost,true,0);
+  if (IsEnterprise) then begin 
+  MatCol(1,-100,"Труд.",0,ExtraCost,true,0);
+  end;
+  MatCol(1,-40,"Коэфф.",0,Coefficient,false,0);
+  if (IsEnterprise) then begin
+    Flip(flipnr); flipnr = flipnr + 1;
+  MatCol(1,-375,"Объекты",0,Objects,false,ObjSClass);
+  MatCol(1,-310,"Затр.",0,InQty,true,0);
+  MatCol(1,-260,"Выпуск",0,OutQty,true,0);
+  MatCol(1,-210,"Действит.",0,ActualQty,true,0);
+  MatCol(1,-160,"Материал",0,Material,false,MaterialSClass);
+  end;
+  if (HasSerialNumbers) then begin
+    Flip(flipnr); flipnr = flipnr + 1;
+  MatCol(1,-270,"Затр.",0,InQty,true,0);
+  MatCol(1,-220,"Выпуск",0,OutQty,true,0);
+  MatCol(1,-170,"Сер.№",0,SerialNr,false,SerialNrSClass);
+    if (IsEnterprise) then begin
+  MatCol(1,-80,"Годен до",0,BestBefore,false,PasteCurDate);
+    end;
+  end;
+  Flip(flipnr); flipnr = flipnr + 1;
+  MatCol(1,-270,"Затр.",0,InQty,true,0);
+  MatCol(1,-220,"Выпуск",0,OutQty,true,0);
+  MatCol(1,-170,"Вес",0,Weight,true,0);
+  MatCol(1,-120,"Шир.",0,UnitXval,true,0);
+  MatCol(1,-80,"Выс.",0,UnitYval,true,0);
+  MatCol(1,-40,"Глуб.",0,UnitZval,true,0);
+  if (IsEnterprise) then begin
+    Flip(flipnr); flipnr = flipnr + 1;
+  MatCol(1,-100,"FIFO исход. строки",0,OrgProdFIFORowVal,true,0); 
+  end;
+  InsertRowTest;
+  DeleteRowTest;
+  RowMenuBegin("");         
+  RowMenuItem(0,"Статус товара",'I','I',0,"ItemStatusProdDsm");         
+  if (IsEnterprise) then begin
+  RowMenuItem(0,"Открыть спецификацию партии",' ',' ',0,"OpenBatchProdDsm"); 
+    RowMenuItem(0,"Контроль качества",' ',' ',0,"QualConFromProdDsm");         
+  end;
+  EndRowMenu;
+  EndMatrix;
+  v=v+1;
+  if (flipnr>2) then begin
+    for (f=1;f<flipnr;f=f+1) begin
+      VTab(-35,v,-16,v+vs,ToolFlip,f,chr(asc("A") + f - 1)); 
+      v = v + vs;
+    end;
+  end;
+  if (IsEnterprise) then begin
+  EditField(h,-22,60,"Затр. вес",Normal,TotWeight,false,0);
+  EditField(h4,-22,60,"Вып. вес",Normal,TotOutWeight,false,0);
+  Tile(2,120,false,"2",Comment);
+  EditField(h,v=15,-20,"Комм.",Normal,Comment,false,0);
+  EditField(h,v+=vs,-20,"",Normal,Comment2,false,0);
+  EditField(h,v+=vs,-20,"",Normal,Comment3,false,0);
+  EditField(h,v+=vs,-20,"Объекты",Normal,Objects,false,ObjSClass);
+  EditField(h,v+=vs,60,"Время, с",Normal,StartTime,false,PasteCurTime);
+  EditField(210,v,60,"Время, по",Normal,EndTime,false,PasteCurTime);
+  EditField(h2,v,60,"Время прерыв.",Normal,BreakTime,false,0);
+  EditField(h2+200,v,70,"Язык",Normal,LangCode,true,LangSCLass);
+//  EditField(h2+200,v,80,"AcumCostPrice",ViewOnly,AcumCostPrice,false,0);
+  end;
+  if (IsEnterprise) then begin
+  SpecialMenu("Пересчитать стоимость",' ',0,"ProdFillFIFODsm");
+  end;
+  if (HasSerialNumbers) then begin
+  SpecialMenu("Сгенерировать сер. номера выпускаемых товаров",' ',1,"GenSerialNosProdDsm");
+  end;
+  SpecialMenu("Поиск товара",'f',1,"ItemSearchDsm");
+  SpecialMenu("Статус производства",'r',4,"MyProdStatusFromProdDsm");
+  if (HasModNL) then begin
+  SpecialMenu("Открыть запись операции",'t',5,"OpenTRFromProd");
+  end;
+  if (IsEnterprise) then begin
+    SpecialMenu("Нормативное списание",' ',6,"ProdBackflushFromProdDsm");
+  end;
+  SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);         
+  SpecialMenu("Разобрать",' ',2,"CreateDisProdFromProd");         
+  if (HasModCRM) then begin
+//    SpecialMenu("Activity",'c',7,"CreateActFromProd");
+  end;
+  if (HasMultiLocations) then begin
+  SpecialMenu("Создать перемещение товаров",' ',8,"StockMovFromPRDsm");
+  end;
+  if (IsEnterprise) then begin
+    SpecialMenu("Создать операции производств",' ',9,"ProdOperFromPRDsm");
+  end;
+  EndWindow;
+end;

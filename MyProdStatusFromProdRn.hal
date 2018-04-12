@@ -1,0 +1,105 @@
+SetLangMode(LangRussian,"RUS",0);
+
+
+global procedure MyProdStatusFromProdRn(record RcVc RepSpec)
+begin
+	record ProdVc Prodr,Prod2r;
+	row ProdVc Prodrw,Prod2rw;
+	array integer col;
+	integer i,mtrw,j,rwcnt;
+	record ItemStatusVc ISr;
+	val instock,inqty,outqty;
+	vector val vArtQtyIn,vArtQtyOut;
+	boolean TrHs,testf;
+	
+	col[0] = 0;
+	col[1] = 70;
+	col[2] = 290;
+	col[3] = 320;
+	col[4] = 360;
+	col[5] = 400;
+	col[6] = 460;
+	col[7] = 520;
+	col[8] = 560;
+	
+	startreportnoheaderjob("Статус производства");
+		
+		startformat(15);
+			OutString(col[0],0,"Код",false);
+			OutString(col[1],0,"Название",false);
+			OutString(col[2],0,"Выпуск",false);
+			OutString(col[3],0,"Необходимо",false);
+			OutString(col[4],0,"На складе",false);
+			OutString(col[5],0,"В других произв.",false);
+			OutString(col[6],0,"Дефицит",false);
+			OutString(col[7],0,"",false);
+			OutString(col[8],0,"",false);
+		endformat;
+		Prodr.SerNr = RepSpec.long1;
+		
+		
+		if(readfirstmain(Prodr,1,true))then begin
+			
+			Prod2r.PRStatusFlag = 0;
+			TrHs = true;
+			while(loopkey("PRStatusFlag",Prod2r,1,TrHs))begin
+				testf = true;
+				if(Prod2r.PRStatusFlag>2)then begin TrHs = false; testf = false; end;
+				if(nonblank(Prodr.Location) and Prodr.Location!=Prod2r.Location)then begin testf = false; end;
+				if(Prodr.SerNr==Prod2r.SerNr)then begin testf = false; end;
+				
+				
+				if(testf)then begin
+					mtrw = matrowcnt(Prod2r);
+					For(i=0;i<mtrw;i=i+1) begin
+						matrowget(Prod2r,i,Prod2rw);
+						vArtQtyIn[Prod2rw.Item] = vArtQtyIn[Prod2rw.Item] + Prod2rw.InQty*Prod2r.Qty;
+						vArtQtyOut[Prod2rw.Item] = vArtQtyOut[Prod2rw.Item] + Prod2rw.OutQty*Prod2r.Qty;
+					end;
+				end;
+			end;
+			
+			mtrw = matrowcnt(Prodr);
+			For(i=0;i<mtrw;i=i+1) begin
+	  		matrowget(Prodr,i,Prodrw);
+	  		startformat(15);
+	  			inqty = blankval;
+	  			outqty = blankval;
+	  			if(Prodrw.InQty*Prodr.Qty!=0)then begin
+	  				inqty = Prodrw.InQty*Prodr.Qty;
+	  			end;
+	  			if(Prodrw.OutQty*Prodr.Qty!=0)then begin
+	  				outqty = Prodrw.OutQty*Prodr.Qty;
+	  			end;
+					OutString(col[0],0,Prodrw.Item,false);
+					OutString(col[1],0,Prodrw.Comment,false);
+					OutVal(col[2],0,outqty,M4Val,false);
+					OutVal(col[3],0,inqty,M4Val,false);
+					
+					ISr.Code = Prodrw.Item;
+					ISr.Location = Prodr.Location;
+					if(blank(Prodr.Location))then begin
+						ISr.Location = ";;;";
+					end;
+					instock = blankval;
+					if(readfirstmain(ISr,2,true))then begin
+						instock = ISr.Instock;
+					end;
+					
+					OutVal(col[4],0,instock,m4val,false);
+					OutVal(col[5],0,-vArtQtyOut[Prodrw.Item]+vArtQtyIn[Prodrw.Item],M4Val,false);
+					if((instock + vArtQtyOut[Prodrw.Item]-vArtQtyIn[Prodrw.Item]-Prodrw.InQty*Prodr.Qty)<0 and Prodrw.InQty>0)then begin
+						OutVal(col[6],0,-(instock + vArtQtyOut[Prodrw.Item]-vArtQtyIn[Prodrw.Item]-Prodrw.InQty*Prodr.Qty),M4Val,false);
+					end else begin
+					
+					end;
+					//OutString(col[7],0,"",false);
+					//OutString(col[8],0,"",false);
+				endformat;
+			end; 
+		end;
+	
+	endjob;
+	
+return;
+end;
