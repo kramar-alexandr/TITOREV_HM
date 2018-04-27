@@ -2165,46 +2165,46 @@ begin
   real h,h2,h3,h4,v,vm,vs;
   Integer rn,flipnr,f;
   
-  WindowBegin("Производство",ProdDClass,CGview,-);
+ WindowBegin("Производство",ProdDClass,CGview,-);
   SetWRect(20,80,620,333);
   Sizeable(-1,-1,0,0);
   UseView(ProdVc);
   FormName(ProdOrderForm);
   ActiveFieldOnNew("Recepy");
   Tile(0,175,false,"",SerNr);
-  vs = 20; h = 70; h2 = 390; v = 10; h3 = 500; h4 = 220;
-  EditField(h,v,80,"Номер",St_i,SerNr,false,TSerSClass);
+  vs = 20; h = 70; h2 = 460; v = 10; h3 = 560; h4 = 290;
+  EditField(h,v,140,"Номер",St_i,SerNr,false,TSerSClass);
   EditField(h4,v,250,"Наим.",Normal,RecName,false,0);
-  EditField(h,v+=vs,80,"Структ.",Normal,Recepy,false,RecSClass);
+  EditField(h,v+=vs,140,"Структ.",Normal,Recepy,false,RecSClass);
   EditField(h4,v,80,"Дата нач.",Normal,StartDate,false,PasteCurDate);
   EditField(h2,v,80,"Дата оконч.",Normal,ProdDate,false,PasteCurDate);
-  EditField(h,vm=(v+=vs),80,"К-во",Normal,Qty,true,0);
+  EditField(h,vm=(v+=vs),140,"К-во",Normal,Qty,true,0);
   if (IsEnterprise) then begin
   EditField(h4,v,80,"Время нач.",Normal,StartTime,false,PasteCurTime);
   EditField(h2,v,80,"Время оконч.",Normal,EndTime,false,PasteCurTime);
   end;
   if (HasMultiLocations) then begin
-  EditField(h,v+=vs,80,"Склад",Normal,Location,false,LocationSClass);
+  EditField(h,v+=vs,140,"Склад",Normal,Location,false,LocationSClass);
   end;
   if (IsEnterprise) then begin
     EditField(h4,v,80,"Класс",Normal,ProdClass,false,ProdClassSClass);
     EditField(h2,v,80,"Машина",Normal,FixAssCode,false,AT2UnitSClass);
   end;
   if (IsEnterprise) then begin
-  EditField(h,v+=vs,80,"Провер.",Normal,Inspector,false,UserSClass);
+  EditField(h,v+=vs,140,"Провер.",Normal,Inspector,false,UserSClass);
   end;
   if (HasPersons) then begin
-  EditField(h2,v,80,"Сотр.",Normal,Person,false,UserSClass);
+  EditField(h2,v,80,"Сотр.",Normal,Person,false,UserSClass);// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 27 April 2018 09:54:16
   end;
 //  EditField(h2,v,80,"In Item Scale",Normal,Scale,false,0);
   if (IsEnterprise) then begin
-    EditField(h,v+=vs,80,"Зак.на пр.",ViewOnly,ProdOrder,false,0);
+    EditField(h,v+=vs,140,"Зак.на пр.",ViewOnly,ProdOrder,false,0);
     EditField(h2,v,80,"Причина отмены",Normal,StandProblem,false,StandProblemsSClass);
   end else begin
     EditField(h2,v+=vs,80,"Причина отмены",Normal,StandProblem,false,StandProblemsSClass);   // From dict
   end;
   if (IsEnterprise) then begin
-    EditField(h,v+=vs,80,"Действ. кол.",ViewOnly,ActualQty,true,0);
+    EditField(h,v+=vs,140,"Действ. кол.",ViewOnly,ActualQty,true,0);
     EditField(h2,v,80,"Маршрут",Normal,Routing,false,RoutingSClass);
   end;
 //  ButtonFrame(h3,v+=36,80,3,"Inspection");
