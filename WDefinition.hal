@@ -2133,6 +2133,32 @@ begin
 end;
 
 
+window ProdLClass:1// Edit ************************** BPI Ukraine - KramarAlexandr - Friday, 27 April 2018 10:00:36
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
+begin
+  WindowBegin("Производства",ProdLClass,CGmlist,ProdView);
+  SetWRect(64,80,570,298);
+  SpawnClass(ProdDClass);
+  Sizeable(-1,-1,0,0);
+  UseView(ProdVc);
+  FormName(PrintProdL);
+  RecordList(4,17,-21,-39);
+  RlColKey(4,4,  "Номер",SerNr,false,SerNr);
+  RlColKey(71,66,"Статус",DoneFlag,false,PRStatusFlag);
+  RlColKey(121,121,"Дата нач.",StartDate,false,StartDate);
+  RlColKey(195,195,"Дата пр.",ProdDate,false,ProdDate);
+  RlColKey(271,271,"Комментарий",Comment,false,Comment);
+  if (StandardHansa==false) then begin
+    //RlColKey(-55,-55,"Класс",ProdClass,false,ProdClass);
+  end;
+  RlColKey(-70,-70,"Сотр.",Person,false,Person);
+  SearchField("Поиск");
+//  SpecMenuItem("Finish",' ',0); no code
+  SpecMenuGroup("",kSpecMenuGroupTypeExtendedPlusMenu,0);         
+  SpecialMenu("Создать производство",' ',1,"ProdCreateProdLsm");
+  EndWindow;
+end;
+
 window ProdDClass:1
   wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer")
 begin

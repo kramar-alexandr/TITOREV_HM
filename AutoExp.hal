@@ -292,7 +292,7 @@ begin
 					RepSpec.f2 = EDEb.Location;
 					RepSpec.f3 = EDEb.PriceList;
 					RepSpec.flags[0] = EDEb.ShowFlag;
-				RepSpec.f4 = EDEb.Group;  // mik
+					RepSpec.f4 = EDEb.Group;  // mik
 					AutoExportItemEn(RepSpec);
 				end;
 			end;
