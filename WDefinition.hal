@@ -2173,8 +2173,8 @@ begin
   ActiveFieldOnNew("Recepy");
   Tile(0,175,false,"",SerNr);
   vs = 20; h = 70; h2 = 460; v = 10; h3 = 560; h4 = 290;
-  EditField(h,v,140,"Номер",St_i,SerNr,false,TSerSClass);
-  EditField(h4,v,250,"Наим.",Normal,RecName,false,0);
+  EditField(h,v,80,"Номер",St_i,SerNr,false,TSerSClass);
+  EditField(h4-80,v,330,"Наим.",Normal,RecName,false,0);
   EditField(h,v+=vs,140,"Структ.",Normal,Recepy,false,RecSClass);
   EditField(h4,v,80,"Дата нач.",Normal,StartDate,false,PasteCurDate);
   EditField(h2,v,80,"Дата оконч.",Normal,ProdDate,false,PasteCurDate);
