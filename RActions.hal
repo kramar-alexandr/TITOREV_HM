@@ -1,0 +1,39 @@
+
+
+global
+updating function LongInt IVVcRecordCheck(record IVVc IVp,record IVVc IV2p,LongInt stat,LongInt long4)
+begin
+  LongInt res;
+  
+  if (blank(IVp.CurncyCode)) then begin
+		RecordCheckError(1058,"",-1,"CurncyCode");      
+		res = -1; 
+		goto L99;
+  end;
+  
+  res = inner.IVVcRecordCheck(IVp,IV2p,stat,long4);
+
+L99:;
+
+  IVVcRecordCheck = res;
+  return;
+end;
+
+global
+updating function LongInt ORVcRecordCheck(record ORVc ORp,record ORVc OR2p,LongInt stat,LongInt long4)
+begin
+  LongInt res;
+  
+  if (blank(ORp.CurncyCode)) then begin
+		RecordCheckError(1058,"",-1,"CurncyCode");      
+		res = -1; 
+		goto O99;
+  end;
+  
+  res = inner.ORVcRecordCheck(ORp,OR2p,stat,long4);
+
+O99:;
+
+  ORVcRecordCheck = res;
+  return;
+end;
