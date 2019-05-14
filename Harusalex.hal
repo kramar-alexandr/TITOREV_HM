@@ -4252,7 +4252,7 @@ begin
   FormName(RecForm);
   vs = 20;
   h = 130; h2 = 350; h3 = 570;
-  EditField(h,v=10,100,"Код",St_i,Code,false,0);
+  EditField(h-50,v=10,170,"Код",St_i,Code,false,0);
     EditField(h2,v,-40,"Комментарий",Normal,Comment,false,0);
   if (HasAdvancedProduction) then begin
     EditField(h,v+=vs,85,"Норм.произв.кол.",Normal,NormProdQty,true,0);
